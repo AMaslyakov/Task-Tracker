@@ -22,14 +22,15 @@
 
 <script setup>
     import { computed, ref } from 'vue';
-    import { command1 } from '../data/dashboard';
     import TaskCard from './TaskCard.vue';
 
-    const config = command1.config_dashboard;
-
-    defineProps({
+    const props = defineProps({
         tasks: {
             type: Array,
+            required: true
+        },
+        command: {
+            type: Object,
             required: true
         }
     });
@@ -38,9 +39,10 @@
     const columnsScrollRef = ref(null);
     const columnMinWidth = 200;
     const columnGap = 10;
+    const config = computed(() => props.command.config_dashboard);
 
     const minScrollWidth = computed(() => {
-        const statusesCount = config.statuses.length;
+        const statusesCount = config.value.statuses.length;
         const gapsWidth = Math.max(statusesCount - 1, 0) * columnGap;
 
         return `${statusesCount * columnMinWidth + gapsWidth}px`;

@@ -1,23 +1,34 @@
 <template>
   <main class="page-shell">
     <section class="workspace">
-      <AppHeader />
+      <AppHeader
+        :commands="commands"
+        :selected-command-id="selectedCommandId"
+        @update:selected-command-id="selectedCommandId = $event"
+      />
 
       <div class="content-grid">
-        <!-- <TaskList title="Сегодня" :tasks="tasks" /> -->
-        <StatusColumnList :tasks="tasks"/>
-        <!-- <SummaryPanel :items="summaryItems" /> -->
+        <StatusColumnList :tasks="filteredTasks" :command="selectedCommand"/>
       </div>
     </section>
   </main>
 </template>
 
 <script setup>
+import { computed, ref } from 'vue'
 import AppHeader from '../components/AppHeader.vue'
-// import SummaryPanel from '../components/SummaryPanel.vue'
-import TaskList from '../components/TaskList.vue'
 import StatusColumnList from '../components/StatusColumnList.vue';
-import { tasks } from '../data/dashboard'
+import { commands, tasks } from '../data/dashboard'
+
+const selectedCommandId = ref(commands[0].id)
+
+const selectedCommand = computed(() => {
+  return commands.find((command) => command.id === selectedCommandId.value) ?? commands[0]
+})
+
+const filteredTasks = computed(() => {
+  return tasks.filter((task) => task.command.id === selectedCommand.value.id)
+})
 </script>
 
 <style scoped>
