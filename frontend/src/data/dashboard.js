@@ -1,30 +1,136 @@
+const STATUSES = {
+  prog: "In progress",
+  todo: "TODO",
+  review: "Review",
+  done: "Done",
+}
+
 export const tasks = [
   {
-    id: "abc123123",
-    status: 'В работе',
-    title: 'Подготовить backend API',
-    description: 'Описать первые маршруты для задач и health-check.',
+    id: "tsk001aa",
+    status: STATUSES.todo,
+    title: 'Настроить авторизацию',
+    description: 'Реализовать JWT-авторизацию и refresh token.',
     priority: 'Высокий',
-    deadline: '22-06-2026 14:00',
-    tags: ["backend", "frontend"],
+    deadline: '18-06-2026 10:00',
+    tags: ["backend", "auth"],
   },
   {
-    id: "90112abbc",
-    status: 'Ожидает',
-    title: 'Согласовать модель данных',
-    description: 'Зафиксировать поля задачи, пользователя и событий.',
-    priority: 'Средний',
-    deadline: '22-06-2026 14:00',
-    tags: ["general", "users"],
+    id: "tsk002bb",
+    status: STATUSES.todo,
+    title: 'Создать базу данных',
+    description: 'Поднять PostgreSQL и настроить миграции.',
+    priority: 'Высокий',
+    deadline: '19-06-2026 12:00',
+    tags: ["database", "backend"],
   },
   {
-    id: "fabc4567",
-    status: 'Готово',
-    title: 'Поднять frontend',
-    description: 'Собрать Vue-заглушку и раздать ее через Nginx.',
+    id: "tsk003cc",
+    status: STATUSES.prog,
+    title: 'Сверстать страницу логина',
+    description: 'Добавить форму входа и валидацию полей.',
     priority: 'Средний',
-    deadline: '22-06-2026 14:00',
-    tags: ["vue", "nginx"],
+    deadline: '20-06-2026 16:00',
+    tags: ["frontend", "vue"],
+  },
+  {
+    id: "tsk004dd",
+    status: STATUSES.done,
+    title: 'Настроить Docker',
+    description: 'Создать docker-compose для frontend и backend.',
+    priority: 'Средний',
+    deadline: '17-06-2026 11:00',
+    tags: ["docker", "devops"],
+  },
+  {
+    id: "tsk005ee",
+    status: 'Review',
+    title: 'Подготовить Swagger',
+    description: 'Описать документацию для API маршрутов.',
+    priority: 'Средний',
+    deadline: '21-06-2026 15:00',
+    tags: ["backend", "docs"],
+  },
+  {
+    id: "tsk006ff",
+    status: STATUSES.todo,
+    title: 'Добавить CI/CD',
+    description: 'Настроить GitHub Actions для автодеплоя.',
+    priority: 'Высокий',
+    deadline: '24-06-2026 18:00',
+    tags: ["ci", "github"],
+  },
+  {
+    id: "tsk007gg",
+    status: STATUSES.prog,
+    title: 'Настроить Nginx',
+    description: 'Добавить reverse proxy для frontend и API.',
+    priority: 'Средний',
+    deadline: '22-06-2026 13:00',
+    tags: ["nginx", "server"],
+  },
+  {
+    id: "tsk008hh",
+    status: STATUSES.todo,
+    title: 'Создать страницу задач',
+    description: 'Вывести список задач с фильтрацией.',
+    priority: 'Высокий',
+    deadline: '23-06-2026 17:00',
+    tags: ["frontend", "tasks"],
+  },
+  {
+    id: "tsk009ii",
+    status: STATUSES.done,
+    title: 'Подключить ESLint',
+    description: 'Настроить правила линтинга для проекта.',
+    priority: 'Низкий',
+    deadline: '16-06-2026 09:00',
+    tags: ["eslint", "frontend"],
+  },
+  {
+    id: "tsk010jj",
+    status: 'Review',
+    title: 'Проверить адаптивность',
+    description: 'Протестировать интерфейс на мобильных устройствах.',
+    priority: 'Средний',
+    deadline: '25-06-2026 14:00',
+    tags: ["ui", "mobile"],
+  },
+  {
+    id: "tsk011kk",
+    status: STATUSES.todo,
+    title: 'Добавить уведомления',
+    description: 'Реализовать toast-уведомления для действий пользователя.',
+    priority: 'Средний',
+    deadline: '26-06-2026 12:00',
+    tags: ["frontend", "ux"],
+  },
+  {
+    id: "tsk012ll",
+    status: STATUSES.prog,
+    title: 'Реализовать поиск',
+    description: 'Добавить поиск задач по названию и тегам.',
+    priority: 'Высокий',
+    deadline: '27-06-2026 11:00',
+    tags: ["search", "tasks"],
+  },
+  {
+    id: "tsk013mm",
+    status: STATUSES.done,
+    title: 'Настроить логирование',
+    description: 'Добавить Winston для логирования backend-сервиса.',
+    priority: 'Средний',
+    deadline: '18-06-2026 08:00',
+    tags: ["backend", "logs"],
+  },
+  {
+    id: "tsk014nn",
+    status: 'Review',
+    title: 'Подготовить релиз',
+    description: 'Проверить сборку и подготовить changelog.',
+    priority: 'Высокий',
+    deadline: '30-06-2026 19:00',
+    tags: ["release", "deploy"],
   }
 ]
 
@@ -42,3 +148,34 @@ export const summaryItems = [
     value: 1
   }
 ]
+
+export const user1 = {
+  id: 2333,
+  name: "Vasya",
+  email: "sdfsdf@sdf.ru",
+  is_admin: false
+} 
+
+export const user2 = {
+  id: 3,
+  name: "petya",
+  email: "op@op.ru",
+  is_admin: true
+}
+
+export const user3 = {
+  id: 3,
+  name: "user user",
+  email: "user@le.ru",
+  is_admin: false
+}
+
+export const command1 = {
+  id: 123132,
+  name: "Команда A",
+  members: [user1, user2, user3],
+  config_dashboard: {
+    statuses: [STATUSES.todo, STATUSES.prog, STATUSES.done, STATUSES.review]
+  }
+}
+
