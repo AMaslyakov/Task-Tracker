@@ -15,6 +15,7 @@
                     </template>
                 </div>
             </div>
+
         </div>
     </div>
 </template> 
@@ -64,6 +65,7 @@
 </script>
 
 <style scoped>
+
     .statuses{
         grid-column: 1 / -1;
         width: 100%;
@@ -110,6 +112,7 @@
         min-width: 0;
         /* border: 2px solid black; */
         /* border-radius: 14px 14px 0 0; */
+
     }
 
     .status-name{
@@ -118,6 +121,7 @@
         font-size: 20px;
         font-weight: 700;
         color: black;
+
         min-height: 45px;
         border: 2px solid black;
         border-radius: 14px 14px 0 0;

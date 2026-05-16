@@ -5,6 +5,7 @@ const STATUSES = {
   done: "Done",
 }
 
+
 export const user1 = {
   id: 2333,
   name: "Vasya",
@@ -26,12 +27,14 @@ export const user3 = {
   is_admin: false
 }
 
+
 export const tasks = [
   {
     id: "tsk001aa",
     status: STATUSES.todo,
     title: 'Настроить авторизацию',
     description: 'Реализовать JWT-авторизацию и refresh token.',
+
     priority: 'Высокий',
     deadline: '18-06-2026 10:00',
     asigned_to: user1,
@@ -125,6 +128,7 @@ export const tasks = [
     priority: 'Средний',
     deadline: '25-06-2026 14:00',
     asigned_to: user1,
+
     tags: ["ui", "mobile"],
   },
   {
@@ -134,7 +138,9 @@ export const tasks = [
     description: 'Реализовать toast-уведомления для действий пользователя.',
     priority: 'Средний',
     deadline: '26-06-2026 12:00',
+
     asigned_to: user2,
+
     tags: ["frontend", "ux"],
   },
   {
@@ -144,7 +150,9 @@ export const tasks = [
     description: 'Добавить поиск задач по названию и тегам.',
     priority: 'Высокий',
     deadline: '27-06-2026 11:00',
+
     asigned_to: user3,
+
     tags: ["search", "tasks"],
   },
   {
@@ -154,7 +162,9 @@ export const tasks = [
     description: 'Добавить Winston для логирования backend-сервиса.',
     priority: 'Средний',
     deadline: '18-06-2026 08:00',
+
     asigned_to: user1,
+
     tags: ["backend", "logs"],
   },
   {
@@ -164,7 +174,9 @@ export const tasks = [
     description: 'Проверить сборку и подготовить changelog.',
     priority: 'Высокий',
     deadline: '30-06-2026 19:00',
+
     asigned_to: user2,
+
     tags: ["release", "deploy"],
   }
 ]
@@ -183,6 +195,29 @@ export const summaryItems = [
     value: 1
   }
 ]
+
+
+export const user1 = {
+  id: 2333,
+  name: "Vasya",
+  email: "sdfsdf@sdf.ru",
+  is_admin: false
+} 
+
+export const user2 = {
+  id: 3,
+  name: "petya",
+  email: "op@op.ru",
+  is_admin: true
+}
+
+export const user3 = {
+  id: 3,
+  name: "user user",
+  email: "user@le.ru",
+  is_admin: false
+}
+
 
 export const command1 = {
   id: 123132,
