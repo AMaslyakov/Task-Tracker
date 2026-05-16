@@ -4,8 +4,9 @@
       <AppHeader />
 
       <div class="content-grid">
-        <TaskList title="Сегодня" :tasks="tasks" />
-        <SummaryPanel :items="summaryItems" />
+        <!-- <TaskList title="Сегодня" :tasks="tasks" /> -->
+        <StatusColumnList :tasks="tasks"/>
+        <!-- <SummaryPanel :items="summaryItems" /> -->
       </div>
     </section>
   </main>
@@ -13,9 +14,10 @@
 
 <script setup>
 import AppHeader from '../components/AppHeader.vue'
-import SummaryPanel from '../components/SummaryPanel.vue'
+// import SummaryPanel from '../components/SummaryPanel.vue'
 import TaskList from '../components/TaskList.vue'
-import { summaryItems, tasks } from '../data/dashboard'
+import StatusColumnList from '../components/StatusColumnList.vue';
+import { tasks } from '../data/dashboard'
 </script>
 
 <style scoped>

@@ -26,7 +26,7 @@ defineProps({
 
 <style scoped>
 .task-column {
-  border: 1px solid #dce3ee;
+  border: 1px solid #0955cf;
   border-radius: 8px;
   padding: 20px;
   background: #ffffff;

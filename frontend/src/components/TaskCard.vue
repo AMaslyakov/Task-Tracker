@@ -10,7 +10,15 @@
     </div>
 
     <p>{{ task.description }}</p>
-
+    
+    <div class="task-asigned">
+      <div class="task-asigned-name">
+        Исполнитель: {{ task.asigned_to.name }}
+      </div>
+      <div class="task-asigned-email">
+      {{ task.asigned_to.email }}
+      </div>
+    </div>
     <div class="task-priority">
       <span>Приоритет: {{ task.priority }}</span>
     </div>
@@ -25,6 +33,8 @@
 </template>
 
 <script setup>
+import { tasks } from '../data/dashboard';
+
 defineProps({
   task: {
     type: Object,

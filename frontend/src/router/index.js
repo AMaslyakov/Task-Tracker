@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DashboardPage from '../pages/DashboardPage.vue'
 import LoginPage from '../pages/LoginPage.vue'
+import TaskPage from '../pages/TaskPage.vue'
 
 const routes = [
   {
@@ -16,6 +17,12 @@ const routes = [
     path: '/tasks',
     name: 'tasks',
     component: DashboardPage
+  },
+  {
+    // Путь будет формироваться по id задачи в
+    path: '/task/id', 
+    name: 'task',
+    component: TaskPage
   }
 ]
 
