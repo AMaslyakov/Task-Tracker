@@ -15,7 +15,7 @@ func DBAllTasks(ctx context.Context) ([]Task, error) {
     SELECT 
         t.id, 
         t.title, 
-        t.description,
+        COALESCE(t.description, ''),
         p.priority_name,
         s.status_name,
         t.deadline,
@@ -23,7 +23,7 @@ func DBAllTasks(ctx context.Context) ([]Task, error) {
         t.updated_at,
         teams.team_name,
         creator.user_name AS created_by,
-        assignee.user_name AS assigned_to
+        COALESCE(assignee.user_name, '') AS assigned_to
     FROM tasks t
     JOIN priorities p ON p.id = t.priority_id
     JOIN statuses s ON s.id = t.status_id
