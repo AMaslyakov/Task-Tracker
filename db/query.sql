@@ -15,6 +15,19 @@ CREATE TABLE IF NOT EXISTS priorities (
     keywords TEXT[] NOT NULL
 );
 
+INSERT INTO statuses (status_name) VALUES
+    ('TODO'),
+    ('IN PROGRESS'),
+    ('DONE'),
+    ('REVIEW'),
+    ('BLOCKED'),
+    ('PLANNED'),
+    ('TESTING'),
+    ('ARCHIVED'),
+    ('CANCELLED'),
+    ('REOPENED');
+
+
 -- 1 приоритет -> много задач; 1 задача -> 1 приоритет → 1:N
 
 -- 3. Пользователи
