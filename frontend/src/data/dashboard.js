@@ -20,6 +20,8 @@ export const user2 = {
   is_admin: true
 }
 
+
+
 export const user3 = {
   id: 3,
   name: "user user",
@@ -197,26 +199,26 @@ export const summaryItems = [
 ]
 
 
-export const user1 = {
-  id: 2333,
-  name: "Vasya",
-  email: "sdfsdf@sdf.ru",
-  is_admin: false
-} 
+// export const user1 = {
+//   id: 2333,
+//   name: "Vasya",
+//   email: "sdfsdf@sdf.ru",
+//   is_admin: false
+// } 
 
-export const user2 = {
-  id: 3,
-  name: "petya",
-  email: "op@op.ru",
-  is_admin: true
-}
+// export const user2 = {
+//   id: 3,
+//   name: "petya",
+//   email: "op@op.ru",
+//   is_admin: true
+// }
 
-export const user3 = {
-  id: 3,
-  name: "user user",
-  email: "user@le.ru",
-  is_admin: false
-}
+// export const user3 = {
+//   id: 3,
+//   name: "user user",
+//   email: "user@le.ru",
+//   is_admin: false
+// }
 
 
 export const command1 = {
