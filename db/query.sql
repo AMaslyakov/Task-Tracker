@@ -3,6 +3,17 @@ CREATE TABLE IF NOT EXISTS statuses (
     id SERIAL PRIMARY KEY,
     status_name TEXT NOT NULL UNIQUE
 );
+INSERT INTO statuses (status_name) VALUES
+    ('TODO'),
+    ('IN PROGRESS'),
+    ('DONE'),
+    ('REVIEW'),
+    ('BLOCKED'),
+    ('PLANNED'),
+    ('TESTING'),
+    ('ARCHIVED'),
+    ('CANCELLED'),
+    ('REOPENED');
 
 -- 1 статус -> много задач; 1 задача -> 1 статус → 1:N
 -- отношение: statuses (1) ← statuses_id (N) в tasks
@@ -15,17 +26,13 @@ CREATE TABLE IF NOT EXISTS priorities (
     keywords TEXT[] NOT NULL
 );
 
-INSERT INTO statuses (status_name) VALUES
-    ('TODO'),
-    ('IN PROGRESS'),
-    ('DONE'),
-    ('REVIEW'),
-    ('BLOCKED'),
-    ('PLANNED'),
-    ('TESTING'),
-    ('ARCHIVED'),
-    ('CANCELLED'),
-    ('REOPENED');
+INSERT INTO priorities (id, priority_name, weight, keywords) VALUES
+(1, 'Critical',   1, ARRAY['critical', 'crit', 'urgent']),
+(2, 'High',       2, ARRAY['high', 'important', 'major']),
+(3, 'Medium',     3, ARRAY['medium', 'normal', 'standard']),
+(4, 'Low',        4, ARRAY['low', 'minor', 'trivial']),
+(5, 'Backlog',    5, ARRAY['backlog', 'later', 'someday', 'plan']),
+(6, 'Blocked',    6, ARRAY['block', 'blocked']);
 
 
 -- 1 приоритет -> много задач; 1 задача -> 1 приоритет → 1:N
