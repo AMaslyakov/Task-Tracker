@@ -34,7 +34,7 @@
 
 ## Сущность Login
 
-### Пол
+### Поля
 
 - id
 - user_name (FK на User.name)
