@@ -6,10 +6,25 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:80"
+    depends_on:
+      - backend
     restart: unless-stopped
 
-#  postgres:
-#     взят емейдж без докер файла записанв постгре
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DB_DSN: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8080"
+    expose:
+      - "8080"
+    restart: unless-stopped
+
   postgres:
     image: postgres:alpine3.22
     container_name: postgres
@@ -17,7 +32,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -26,4 +40,3 @@ services:
 
 volumes:
   postgres_data:
-
