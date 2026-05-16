@@ -29,6 +29,34 @@ export const user3 = {
   is_admin: false
 }
 
+export const command1 = {
+  id: 123132,
+  name: "Команда A",
+  members: [user1, user2, user3],
+  config_dashboard: {
+    statuses: [STATUSES.todo, STATUSES.prog, STATUSES.review, STATUSES.done]
+  }
+}
+
+export const command2 = {
+  id: 984221,
+  name: "Команда B",
+  members: [user1, user3],
+  config_dashboard: {
+    statuses: [STATUSES.todo, STATUSES.prog, STATUSES.review, STATUSES.done]
+  }
+}
+
+export const command3 = {
+  id: 564322,
+  name: "Команда C",
+  members: [user2],
+  config_dashboard: {
+    statuses: [STATUSES.todo, STATUSES.prog, STATUSES.review, STATUSES.done]
+  }
+}
+
+export const commands = [command1, command2, command3]
 
 export const tasks = [
   {
@@ -40,6 +68,7 @@ export const tasks = [
     priority: 'Высокий',
     deadline: '18-06-2026 10:00',
     asigned_to: user1,
+    command: command1,
     tags: ["backend", "auth"],
   },
   {
@@ -50,6 +79,7 @@ export const tasks = [
     priority: 'Высокий',
     deadline: '19-06-2026 12:00',
     asigned_to: user2,
+    command: command1,
     tags: ["database", "backend"],
   },
   {
@@ -60,6 +90,7 @@ export const tasks = [
     priority: 'Средний',
     deadline: '20-06-2026 16:00',
     asigned_to: user3,
+    command: command2,
     tags: ["frontend", "vue"],
   },
   {
@@ -70,6 +101,7 @@ export const tasks = [
     priority: 'Средний',
     deadline: '17-06-2026 11:00',
     asigned_to: user1,
+    command: command2,
     tags: ["docker", "devops"],
   },
   {
@@ -80,6 +112,7 @@ export const tasks = [
     priority: 'Средний',
     deadline: '21-06-2026 15:00',
     asigned_to: user2,
+    command: command1,
     tags: ["backend", "docs"],
   },
   {
@@ -90,6 +123,7 @@ export const tasks = [
     priority: 'Высокий',
     deadline: '24-06-2026 18:00',
     asigned_to: user3,
+    command: command3,
     tags: ["ci", "github"],
   },
   {
@@ -100,6 +134,7 @@ export const tasks = [
     priority: 'Средний',
     deadline: '22-06-2026 13:00',
     asigned_to: user1,
+    command: command1,
     tags: ["nginx", "server"],
   },
   {
@@ -110,6 +145,7 @@ export const tasks = [
     priority: 'Высокий',
     deadline: '23-06-2026 17:00',
     asigned_to: user2,
+    command: command2,
     tags: ["frontend", "tasks"],
   },
   {
@@ -120,6 +156,7 @@ export const tasks = [
     priority: 'Низкий',
     deadline: '16-06-2026 09:00',
     asigned_to: user3,
+    command: command3,
     tags: ["eslint", "frontend"],
   },
   {
@@ -130,7 +167,7 @@ export const tasks = [
     priority: 'Средний',
     deadline: '25-06-2026 14:00',
     asigned_to: user1,
-
+    command: command2,
     tags: ["ui", "mobile"],
   },
   {
@@ -142,7 +179,7 @@ export const tasks = [
     deadline: '26-06-2026 12:00',
 
     asigned_to: user2,
-
+    command: command1,
     tags: ["frontend", "ux"],
   },
   {
@@ -154,7 +191,7 @@ export const tasks = [
     deadline: '27-06-2026 11:00',
 
     asigned_to: user3,
-
+    command: command2,
     tags: ["search", "tasks"],
   },
   {
@@ -166,7 +203,7 @@ export const tasks = [
     deadline: '18-06-2026 08:00',
 
     asigned_to: user1,
-
+    command: command3,
     tags: ["backend", "logs"],
   },
   {
@@ -178,7 +215,7 @@ export const tasks = [
     deadline: '30-06-2026 19:00',
 
     asigned_to: user2,
-
+    command: command3,
     tags: ["release", "deploy"],
   }
 ]
@@ -198,34 +235,3 @@ export const summaryItems = [
   }
 ]
 
-
-// export const user1 = {
-//   id: 2333,
-//   name: "Vasya",
-//   email: "sdfsdf@sdf.ru",
-//   is_admin: false
-// } 
-
-// export const user2 = {
-//   id: 3,
-//   name: "petya",
-//   email: "op@op.ru",
-//   is_admin: true
-// }
-
-// export const user3 = {
-//   id: 3,
-//   name: "user user",
-//   email: "user@le.ru",
-//   is_admin: false
-// }
-
-
-export const command1 = {
-  id: 123132,
-  name: "Команда A",
-  members: [user1, user2, user3],
-  config_dashboard: {
-    statuses: [STATUSES.todo, STATUSES.prog, STATUSES.review, STATUSES.done]
-  }
-}
