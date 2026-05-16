@@ -4,6 +4,7 @@ import (
 	"backend/API"
 	"context"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,7 +12,11 @@ import (
 
 func main() {
 	var err error
-	dsn := "postgres://shani:654321@localhost:5432/task-tracker?sslmode=disable"
+	dsn := os.Getenv("DB_DSN")
+	if dsn == "" {
+		log.Fatal("DB_DSN is required")
+	}
+
 	API.Pool, err = pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		log.Fatal("Ошибка подключения к БД:", err)
@@ -20,6 +25,9 @@ func main() {
 
 	r := gin.Default()
 
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
 	r.GET("/api/tasks", API.GetAllTasks)
 
 	log.Println(" Сервер запущен на :8080")
