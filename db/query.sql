@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT NOT NULL UNIQUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    CONSTRAINT email_fmt CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/.[A-Za-z]{2,}$')
+    CONSTRAINT email_fmt CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 );
 
 -- 1:N → один пользователь может:
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS login (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT email_fmt_login CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/.[A-Za-z]{2,}$')
+    CONSTRAINT email_fmt_login CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 );
 
 -- 1:1 → каждый login «привязан» к одному users; один пользователь — один логин
