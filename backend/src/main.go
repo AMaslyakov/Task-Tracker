@@ -29,7 +29,9 @@ func main() {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 	r.GET("/api/tasks", API.GetAllTasks)
+	r.GET("/api/task/:id", API.GetTaskByID)
 	r.GET("/api/teams", API.GetAllTeams)
+	r.GET("/api/team/:id", API.GetTeamByID)
 
 	log.Println(" Сервер запущен на :8080")
 	r.Run(":8080")

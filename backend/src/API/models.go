@@ -11,6 +11,7 @@ type Task struct {
 	Deadline     time.Time `json:"deadline"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
+	TeamID       int       `json:"team_id"`
 	TeamName     string    `json:"team_name"`
 	CreatedBy    string    `json:"created_by"`
 	AssignedTo   string    `json:"assigned_to"`
@@ -24,11 +25,12 @@ type Task struct {
 //}
 
 type Team struct {
-	ID          int       `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	CreatedAt   string    `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	Tasks       []string  `json:"tasks"`
-	Members     []string  `json:"members"`
+	ID              int      `json:"id"`
+	Name            string   `json:"name"`
+	Description     string   `json:"description"`
+	ConfigDashboard []string `json:"config_dashboard"`
+	CreatedAt       string   `json:"created_at"`
+	UpdatedAt       string   `json:"updated_at"`
+	Tasks           []string `json:"tasks"`
+	Members         []string `json:"members"`
 }

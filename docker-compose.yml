@@ -17,8 +17,11 @@ services:
       dockerfile: Dockerfile
     environment:
       DB_DSN: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+      BROKER_URL: amqp://${RABBITMQ_DEFAULT_USER:-task_tracker}:${RABBITMQ_DEFAULT_PASS:-task_tracker}@broker:5672/
+      BROKER_EXCHANGE: task_events
     depends_on:
       - postgres
+      - broker
     ports:
       - "8081:8080"
     expose:
@@ -38,5 +41,20 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     restart: "no"
 
+  broker:
+    image: rabbitmq:3-management-alpine
+    container_name: broker
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-task_tracker}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-task_tracker}
+    volumes:
+      - ./broker/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - broker_data:/var/lib/rabbitmq
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  broker_data:
