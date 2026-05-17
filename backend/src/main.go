@@ -30,6 +30,10 @@ func main() {
 	})
 	r.GET("/api/tasks", API.GetAllTasks)
 	r.GET("/api/task/:id", API.GetTaskByID)
+	r.POST("/api/task", API.InsertTask)
+	r.PATCH("/api/task/:id", API.UpdateTask)
+	r.PATCH("/api/task/:id/status", API.UpdateTaskStatus)
+	r.DELETE("/api/task/:id", API.DeleteTask)
 	r.GET("/api/teams", API.GetAllTeams)
 	r.GET("/api/team/:id", API.GetTeamByID)
 
