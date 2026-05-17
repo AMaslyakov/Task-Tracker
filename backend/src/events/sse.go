@@ -45,7 +45,7 @@ func (h *SSEHub) Run() {
 			h.mu.Unlock()
 
 		case event := <-h.broadcast:
-			h.mu.RLock()
+			h.mu.Lock()
 			for client := range h.clients {
 				select {
 				case client <- event:
@@ -54,7 +54,7 @@ func (h *SSEHub) Run() {
 					delete(h.clients, client)
 				}
 			}
-			h.mu.RUnlock()
+			h.mu.Unlock()
 		}
 	}
 }
