@@ -1,6 +1,7 @@
 package API
 
 import (
+	"backend/events"
 	"net/http"
 	"strconv"
 	"strings"
@@ -44,6 +45,13 @@ func UpdateTask(c *gin.Context) {
 		return
 	}
 
+	go publishEvent(events.NewEvent(events.EventTaskUpdated, events.TaskPayload{
+		TaskID: task.ID,
+		TeamID: task.TeamID,
+		Title:  task.Title,
+		Status: task.StatusName,
+	}))
+
 	c.JSON(http.StatusOK, task)
 }
 
@@ -79,11 +87,18 @@ func UpdateTaskStatus(c *gin.Context) {
 		return
 	}
 
-	task, err := DBUpdateTaskStatus(ctx, taskID, req.StatusName)
+	task, err := DBUpdateTaskStatus(ctx, taskID, req.StatusName) // ваша функция
 	if err != nil {
 		respondTaskDBError(c, err, "failed to update task status")
 		return
 	}
+
+	payload := events.TaskStatusPayload{
+		TaskID:    taskID,
+		TeamID:    task.TeamID,
+		NewStatus: req.StatusName,
+	}
+	publishEvent(events.NewEvent(events.EventTaskStatusChanged, payload))
 
 	c.JSON(http.StatusOK, task)
 }

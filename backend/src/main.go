@@ -3,6 +3,7 @@ package main
 import (
 	"backend/API"
 	_ "backend/docs"
+	"backend/events"
 	"context"
 	"log"
 	"os"
@@ -31,20 +32,34 @@ func main() {
 	}
 	defer API.Pool.Close()
 
+	brokerURL := os.Getenv("BROKER_URL")
+	if brokerURL == "" {
+		log.Fatal("BROKER_URL is required")
+	}
+	exchangeName := os.Getenv("BROKER_EXCHANGE")
+	if exchangeName == "" {
+		exchangeName = "task_events"
+	}
+
+	rmqClient, err := events.NewRabbitMQClient(context.Background(), brokerURL, exchangeName)
+	if err != nil {
+		log.Fatalf("Failed to init RabbitMQ: %v", err)
+	}
+	defer rmqClient.Close()
+
+	API.SetRabbitMQClient(rmqClient)
+	log.Println("RabbitMQ connected")
+
+	sseHub := events.NewSSEHub()
+	go sseHub.Run()
+	log.Println("SSE Hub started")
+
 	r := gin.Default()
 
 	r.GET("/health", healthCheck)
-	r.GET("/api/tasks", API.GetAllTasks)
-	r.GET("/api/task/:id", API.GetTaskByID)
-	r.POST("/api/task", API.InsertTask)
 	r.POST("/api/user", API.CreateUser)
-	r.PATCH("/api/task/:id", API.UpdateTask)
-	r.PATCH("/api/task/:id/status", API.UpdateTaskStatus)
 	r.PATCH("/api/users/:id", API.UpdateUser)
-	r.DELETE("/api/task/:id", API.DeleteTask)
 	r.DELETE("/api/users/:id", API.DeleteUser)
-	r.GET("/api/teams", API.GetAllTeams)
-	r.GET("/api/team/:id", API.GetTeamByID)
 	r.POST("/api/login", API.Login)
 	r.GET("/api/me", API.Me)
 	r.POST("/api/logout", API.Logout)
@@ -59,7 +74,7 @@ func main() {
 	api.DELETE("/task/:id", API.DeleteTask)
 	api.GET("/teams", API.GetAllTeams)
 	api.GET("/team/:id", API.GetTeamByID)
-
+	api.GET("/events", sseHub.SSEHandler)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	log.Println(" Сервер запущен на :8080")

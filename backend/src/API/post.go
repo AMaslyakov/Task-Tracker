@@ -1,6 +1,7 @@
 package API
 
 import (
+	"backend/events"
 	"errors"
 	"log"
 	"net/http"
@@ -40,6 +41,14 @@ func InsertTask(c *gin.Context) {
 		respondTaskDBError(c, err, "failed to create task")
 		return
 	}
+
+	payload := events.TaskPayload{
+		TaskID: task.ID,
+		TeamID: task.TeamID,
+		Title:  task.Title,
+		Status: task.StatusName,
+	}
+	go publishEvent(events.NewEvent(events.EventTaskCreated, payload))
 
 	c.JSON(http.StatusCreated, task)
 }
