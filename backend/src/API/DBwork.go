@@ -406,9 +406,92 @@ func DBIDExists(ctx context.Context, tableName string, id int) (bool, error) {
 	return exists, nil
 }
 
+func DBLoginByEmail(ctx context.Context, email string) (AuthUser, string, error) {
+	var user AuthUser
+	var passwordHash string
+	err := Pool.QueryRow(ctx, `
+        SELECT
+            user_id,
+            user_name,
+            email,
+            is_admin,
+            password_hash
+        FROM login
+        WHERE email = $1`, email).Scan(
+		&user.ID,
+		&user.UserName,
+		&user.Email,
+		&user.IsAdmin,
+		&passwordHash,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return AuthUser{}, "", pgx.ErrNoRows
+		}
+		return AuthUser{}, "", fmt.Errorf("query login by email: %w", err)
+	}
+	return user, passwordHash, nil
+}
+
+func DBCreateSession(ctx context.Context, sessionID string, userID int) error {
+	_, err := Pool.Exec(ctx, `
+        INSERT INTO sessions (sessionid, user_id)
+        VALUES ($1, $2)`, sessionID, userID)
+	if err != nil {
+		return fmt.Errorf("create session: %w", err)
+	}
+	return nil
+}
+
+func DBUserBySession(ctx context.Context, sessionID string) (AuthUser, error) {
+	var user AuthUser
+	err := Pool.QueryRow(ctx, `
+        SELECT
+            u.id,
+            u.user_name,
+            u.email,
+            l.is_admin
+        FROM sessions s
+        JOIN users u ON u.id = s.user_id
+        JOIN login l ON l.user_id = u.id
+        WHERE s.sessionid = $1
+          AND s.created_at >= now() - INTERVAL '30 minutes'`, sessionID).Scan(
+		&user.ID,
+		&user.UserName,
+		&user.Email,
+		&user.IsAdmin,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return AuthUser{}, pgx.ErrNoRows
+		}
+		return AuthUser{}, fmt.Errorf("query user by session: %w", err)
+	}
+	return user, nil
+}
+
+func DBDeleteSession(ctx context.Context, sessionID string) error {
+	_, err := Pool.Exec(ctx, "DELETE FROM sessions WHERE sessionid = $1", sessionID)
+	if err != nil {
+		return fmt.Errorf("delete session: %w", err)
+	}
+	return nil
+}
+
+func DBMarkLoginSuccess(ctx context.Context, userID int) error {
+	_, err := Pool.Exec(ctx, `
+        UPDATE login
+        SET last_login = now(), failed_login = 0, updated_at = now()
+        WHERE user_id = $1`, userID)
+	if err != nil {
+		return fmt.Errorf("mark login success: %w", err)
+	}
+	return nil
+}
+
 func CorrectSession(ctx context.Context, SessionId string) (int, bool) {
 	var userId int
-	err := Pool.QueryRow(ctx, "SELECT UserId FROM Sessions WHERE SessionId = $1", SessionId).Scan(&userId)
+	err := Pool.QueryRow(ctx, "SELECT user_id FROM sessions WHERE sessionid = $1", SessionId).Scan(&userId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return 0, false
