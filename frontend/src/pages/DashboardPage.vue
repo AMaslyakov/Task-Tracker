@@ -1,7 +1,7 @@
 <template>
   <main class="page-shell">
     <section class="workspace">
-      
+
       <AppHeader
         :commands="commands"
         :selected-command-id="selectedCommandId"
@@ -15,8 +15,8 @@
         <p v-else-if="errorMessage" class="state-message state-message-error">{{ errorMessage }}</p>
 
         <template v-else>
-        <p v-if="statusUpdateError" class="state-message state-message-error">{{ statusUpdateError }}</p>
-          
+          <p v-if="statusUpdateError" class="state-message state-message-error">{{ statusUpdateError }}</p>
+
           <div class="dashboard-action-bar">
             <button
               class="create-task-button-dashboard"
@@ -27,7 +27,6 @@
             </button>
           </div>
 
-          
           <StatusColumnList
             v-model:tasks="tasks"
             :tasks="filteredTasks"
@@ -41,7 +40,6 @@
       </div>
     </section>
 
-    
     <TaskForm
       v-if="isModalOpen"
       :task="selectedTask"
@@ -86,14 +84,14 @@ const isModalOpen = ref(false)
 const selectedTask = ref(null)
 
 const selectedCommand = computed(() => {
-  const found = commands.value.find((command) => command.id === selectedCommandId.value)
+  const found = commands.value.find((command) => isSameCommandId(command.id, selectedCommandId.value))
   return found || commands.value[0] || DEFAULT_COMMAND
 })
 
 const filteredTasks = computed(() => {
   return tasks.value.filter((task) => {
     const teamId = task.command?.id || task.team_id || task.team?.id;
-    return teamId === selectedCommand.value.id;
+    return isSameCommandId(teamId, selectedCommand.value.id);
   })
 })
 
@@ -106,9 +104,9 @@ function openCreateModal() {
   isModalOpen.value = true;
 }
 
+/* ИСПРАВЛЕНО: Клик по карточке теперь уводит на отдельную страницу задачи */
 function openEditModal(task) {
-  selectedTask.value = task;
-  isModalOpen.value = true;
+  router.push(`/task/${task.id}`)
 }
 
 function closeModal() {
@@ -149,7 +147,6 @@ async function handleUpdateTask(formData) {
     });
 
     replaceTask(mapTask(updatedTaskFromServer, commands.value));
-
     closeModal();
   } catch (error) {
     console.error('Ошибка при обновлении задачи:', error);
@@ -160,7 +157,7 @@ async function handleUpdateTask(formData) {
 async function handleDeleteTask(taskId) {
   try {
     await deleteTask(taskId);
-    tasks.value = tasks.value.filter(task => task.id !== taskId);
+    tasks.value = tasks.value.filter(task => !isSameCommandId(task.id, taskId));
     closeModal();
   } catch (error) {
     console.error('Ошибка при удалении задачи:', error);
@@ -193,7 +190,6 @@ async function loadDashboard() {
     }
 
     saveCommandId(selectedCommandId.value)
-
     tasks.value = await fetchTasks(commands.value)
   } catch (error) {
     console.error(error)
@@ -201,7 +197,6 @@ async function loadDashboard() {
       router.push('/login')
       return
     }
-
     errorMessage.value = 'Не удалось загрузить задачи из backend'
   } finally {
     isLoading.value = false
@@ -243,7 +238,6 @@ async function handleTaskStatusChanged({ taskId, oldStatus, newStatus }) {
       router.push('/login')
       return
     }
-
     statusUpdateError.value = 'Не удалось сохранить статус задачи'
   } finally {
     isStatusUpdating.value = false
@@ -264,25 +258,24 @@ function saveCommandId(commandId) {
 }
 
 function isSameCommandId(leftId, rightId) {
-  return String(leftId) === String(rightId)
+  if (leftId == null || rightId == null) return false
+  return String(leftId).trim() === String(rightId).trim()
 }
 
 function setTaskStatus(taskId, status) {
   tasks.value = tasks.value.map((task) => {
-    if (task.id === taskId) {
+    if (isSameCommandId(task.id, taskId)) {
       return { ...task, status }
     }
-
     return task
   })
 }
 
 function replaceTask(updatedTask) {
   tasks.value = tasks.value.map((task) => {
-    if (task.id === updatedTask.id) {
+    if (isSameCommandId(task.id, updatedTask.id)) {
       return updatedTask
     }
-
     return task
   })
 }
@@ -291,7 +284,6 @@ function toApiDeadline(value) {
   if (!value) {
     return null
   }
-
   return new Date(`${value}T00:00:00`).toISOString()
 }
 </script>
@@ -300,6 +292,7 @@ function toApiDeadline(value) {
 .page-shell {
   min-height: 100vh;
   padding: 32px;
+  background-color: #f8fafc;
 }
 
 .workspace {
@@ -309,19 +302,16 @@ function toApiDeadline(value) {
 
 .content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: 1fr;
   gap: 20px;
   align-items: start;
 }
 
-
 .dashboard-action-bar {
-  grid-column: 1 / -1; 
   display: flex;
-  justify-content: flex-end; 
-  margin-bottom: 4px; 
+  justify-content: flex-end;
+  margin-bottom: 8px;
 }
-
 
 .create-task-button-dashboard {
   min-height: 42px;
@@ -350,7 +340,6 @@ function toApiDeadline(value) {
 }
 
 .state-message {
-  grid-column: 1 / -1;
   margin: 0;
   color: #475569;
   font-size: 18px;
@@ -364,15 +353,6 @@ function toApiDeadline(value) {
   .page-shell {
     padding: 20px;
   }
-
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard-action-bar {
-    justify-content: fill;
-  }
-
   .create-task-button-dashboard {
     width: 100%;
   }

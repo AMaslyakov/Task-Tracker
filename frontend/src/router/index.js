@@ -19,7 +19,7 @@ const routes = [
     component: DashboardPage
   },
   {
-    path: '/task/id', 
+    path: '/task/:id',
     name: 'task',
     component: TaskPage
   }
@@ -29,3 +29,4 @@ export default createRouter({
   history: createWebHistory(),
   routes
 })
+
