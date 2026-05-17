@@ -1,0 +1,400 @@
+basePath: /
+definitions:
+  API.CreateTaskRequest:
+    properties:
+      assigned_to:
+        type: integer
+      created_by:
+        type: integer
+      deadline:
+        type: string
+      description:
+        type: string
+      priority_id:
+        type: integer
+      status_name:
+        type: string
+      team_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  API.Task:
+    properties:
+      assigned_to:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      deadline:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      priority_name:
+        type: string
+      status_name:
+        type: string
+      team_id:
+        type: integer
+      team_name:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  API.Team:
+    properties:
+      config_dashboard:
+        items:
+          type: string
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      members:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      tasks:
+        items:
+          type: string
+        type: array
+      updated_at:
+        type: string
+    type: object
+  API.UpdateTaskRequest:
+    properties:
+      assigned_to:
+        type: integer
+      deadline:
+        type: string
+      description:
+        type: string
+      priority_id:
+        type: integer
+      status_name:
+        type: string
+      team_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  API.UpdateTaskStatusRequest:
+    properties:
+      status_name:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: Backend API for Victory Group Task Tracker.
+  title: Task Tracker API
+  version: "1.0"
+paths:
+  /api/task:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Task payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/API.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/API.Task'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create task
+      tags:
+      - tasks
+  /api/task/{id}:
+    delete:
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete task
+      tags:
+      - tasks
+    get:
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.Task'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get task by ID
+      tags:
+      - tasks
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Task update payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/API.UpdateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.Task'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update task
+      tags:
+      - tasks
+  /api/task/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Changes task status, intended for drag-and-drop between dashboard
+        columns.
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Task status payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/API.UpdateTaskStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.Task'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update task status
+      tags:
+      - tasks
+  /api/tasks:
+    get:
+      description: Returns all tasks or tasks filtered by team_id.
+      parameters:
+      - description: Team ID
+        in: query
+        name: team_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/API.Task'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get tasks
+      tags:
+      - tasks
+  /api/team/{id}:
+    get:
+      parameters:
+      - description: Team ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.Team'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get team by ID
+      tags:
+      - teams
+  /api/teams:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/API.Team'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get teams
+      tags:
+      - teams
+  /health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Check backend health
+      tags:
+      - health
+swagger: "2.0"

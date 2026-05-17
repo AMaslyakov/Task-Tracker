@@ -11,6 +11,17 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+// InsertTask godoc
+// @Summary Create task
+// @Tags tasks
+// @Accept json
+// @Produce json
+// @Param payload body CreateTaskRequest true "Task payload"
+// @Success 201 {object} Task
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/task [post]
 func InsertTask(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -33,6 +44,18 @@ func InsertTask(c *gin.Context) {
 	c.JSON(http.StatusCreated, task)
 }
 
+// UpdateTask godoc
+// @Summary Update task
+// @Tags tasks
+// @Accept json
+// @Produce json
+// @Param id path int true "Task ID"
+// @Param payload body UpdateTaskRequest true "Task update payload"
+// @Success 200 {object} Task
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/task/{id} [patch]
 func UpdateTask(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -60,6 +83,19 @@ func UpdateTask(c *gin.Context) {
 	c.JSON(http.StatusOK, task)
 }
 
+// UpdateTaskStatus godoc
+// @Summary Update task status
+// @Description Changes task status, intended for drag-and-drop between dashboard columns.
+// @Tags tasks
+// @Accept json
+// @Produce json
+// @Param id path int true "Task ID"
+// @Param payload body UpdateTaskStatusRequest true "Task status payload"
+// @Success 200 {object} Task
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/task/{id}/status [patch]
 func UpdateTaskStatus(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -88,6 +124,15 @@ func UpdateTaskStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, task)
 }
 
+// DeleteTask godoc
+// @Summary Delete task
+// @Tags tasks
+// @Param id path int true "Task ID"
+// @Success 204
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/task/{id} [delete]
 func DeleteTask(c *gin.Context) {
 	ctx := c.Request.Context()
 

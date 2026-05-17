@@ -11,6 +11,16 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+// GetAllTasks godoc
+// @Summary Get tasks
+// @Description Returns all tasks or tasks filtered by team_id.
+// @Tags tasks
+// @Produce json
+// @Param team_id query int false "Team ID"
+// @Success 200 {array} Task
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/tasks [get]
 func GetAllTasks(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -40,6 +50,16 @@ func GetAllTasks(c *gin.Context) {
 	c.JSON(http.StatusOK, tasks)
 }
 
+// GetTaskByID godoc
+// @Summary Get task by ID
+// @Tags tasks
+// @Produce json
+// @Param id path int true "Task ID"
+// @Success 200 {object} Task
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/task/{id} [get]
 func GetTaskByID(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -63,6 +83,13 @@ func GetTaskByID(c *gin.Context) {
 	c.JSON(http.StatusOK, task)
 }
 
+// GetAllTeams godoc
+// @Summary Get teams
+// @Tags teams
+// @Produce json
+// @Success 200 {array} Team
+// @Failure 500 {object} map[string]string
+// @Router /api/teams [get]
 func GetAllTeams(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -78,6 +105,16 @@ func GetAllTeams(c *gin.Context) {
 	c.JSON(http.StatusOK, tasks)
 }
 
+// GetTeamByID godoc
+// @Summary Get team by ID
+// @Tags teams
+// @Produce json
+// @Param id path int true "Team ID"
+// @Success 200 {object} Team
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/team/{id} [get]
 func GetTeamByID(c *gin.Context) {
 	ctx := c.Request.Context()
 

@@ -2,6 +2,8 @@
 
 Backend слушает порт `8080` внутри Docker-сети. Frontend обращается к backend через Nginx-прокси по пути `/api/`.
 
+Swagger UI доступен по адресу `http://localhost:8081/swagger/index.html` при запуске backend через Docker Compose.
+
 ## Health
 
 ### `GET /health`
