@@ -138,7 +138,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 --привязываем функцию к табице
-CREATE TRIGGER  IF NOT EXISTS trigger_clean_sessions
+CREATE TRIGGER trigger_clean_sessions
 BEFORE INSERT ON sessions
 FOR EACH STATEMENT
 EXECUTE FUNCTION clean_old_sessions_trigger();

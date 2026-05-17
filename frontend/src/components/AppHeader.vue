@@ -1,6 +1,6 @@
 <template>
   <div class="toolbar cyberpunk-graphite">
-    <!--стиль заголовка -->
+    <!-- стиль заголовка -->
     <div class="logo-area-cyber">
       <p class="eyebrow-neon">System v2.6</p>
       <h1 class="main-title-neon">Task Tracker</h1>
@@ -8,7 +8,6 @@
 
     <!-- Стиль выбора команды -->
     <label class="command-select">
-      <!-- ИСПРАВЛЕНО: Более читаемый, крупный и чистый шрифт -->
       <span class="select-label">Команда</span>
       <div class="select-wrapper">
         <select :value="selectedCommandId" @change="handleCommandChange">
@@ -209,7 +208,6 @@
   margin-top: 4px;
 }
 
-
 .logout-button {
   min-height: 36px;
   border: 1px solid #64748b;
@@ -229,7 +227,6 @@
 }
 
 /* Адаптивность */
-
 @media (max-width: 760px) {
   .toolbar {
     display: grid;

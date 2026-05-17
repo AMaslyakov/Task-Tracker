@@ -95,7 +95,7 @@
                                 :class="priorityClass(task.priority)"
                                 :data-task-id="task.id"
                             >
-                                <TaskCard :task="task" />
+                                <TaskCard :task="task" @task-click="(clickedTask) => emit('edit-task', clickedTask)" />
                             </div>
                         </template>
                     </Sortable>
@@ -116,7 +116,8 @@
         isStatusUpdating: { type: Boolean, default: false }
     });
 
-    const emit = defineEmits(['task-status-changed']);
+const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
+
 
     const topScrollRef = ref(null);
     const columnsScrollRef = ref(null);
@@ -280,7 +281,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-right: 80px;
+    margin-right: 10px;
 }
     .coder-cat {
         width: 100px;
