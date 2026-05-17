@@ -1,47 +1,47 @@
 <template>
     <div v-if="props.command?.name" class="team-info-widget middle-panel parent-fluid-length">
 
-        <!-- Верхний блок с основной информацией -->
+        
         <div class="team-header-grid">
             <div class="team-text-details">
-                <!-- Название команды -->
+                
                 <h2 class="team-display-name-middle">{{ props.command.name }}</h2>
-                <!-- фон -->
+                
                 <p v-if="props.command.description" class="team-display-desc-middle-balanced">
                     {{ props.command.description }}
                 </p>
             </div>
 
-            <!-- Котик   -->
+            
             <div class="cat-container">
                 <svg class="coder-cat" viewBox="0 0 120 100" xmlns="http://w3.org">
-                    <!-- Ушки -->
+                    
                     <polygon points="25,40 15,10 40,25" fill="#475569" />
                     <polygon points="28,38 20,18 38,26" fill="#f43f5e" />
                     <polygon points="75,40 85,10 60,25" fill="#475569" />
                     <polygon points="72,38 80,18 62,26" fill="#f43f5e" />
-                    <!-- Голова -->
+                    
                     <ellipse cx="50" cy="45" rx="35" ry="25" fill="#64748b" />
-                    <!-- Глазки -->
+                    
                     <path d="M32,42 Q40,38 42,45" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round" />
                     <path d="M68,42 Q60,38 58,45" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round" />
-                    <!-- Нос и рот -->
+                    
                     <polygon points="48,48 52,48 50,51" fill="#f43f5e" />
                     <path d="M46,54 Q50,57 54,54" stroke="#0f172a" stroke-width="1.5" fill="none" />
-                    <!-- Усики -->
+                    
                     <line x1="10" y1="45" x2="25" y2="47" stroke="#cbd5e1" stroke-width="1.5" />
                     <line x1="10" y1="52" x2="25" y2="51" stroke="#cbd5e1" stroke-width="1.5" />
                     <line x1="90" y1="45" x2="75" y2="47" stroke="#cbd5e1" stroke-width="1.5" />
                     <line x1="90" y1="52" x2="75" y2="51" stroke="#cbd5e1" stroke-width="1.5" />
 
-                    <!-- Тело и лапки -->
+                    
                     <path d="M25,65 Q50,55 75,65 L80,95 L20,95 Z" fill="#475569" />
                     <ellipse cx="38" cy="78" rx="7" ry="5" fill="#64748b" />
                     <ellipse cx="62" cy="78" rx="7" ry="5" fill="#64748b" />
 
-                    <!-- Ноутбук -->
+                    
                     <rect x="25" y="65" width="50" height="12" rx="2" fill="#0f172a" stroke="#a855f7" stroke-width="1" />
-                    <!-- Код на экране -->
+                    
                     <line x1="30" y1="69" x2="45" y2="69" stroke="#10b981" stroke-width="1.5" />
                     <line x1="30" y1="73" x2="60" y2="73" stroke="#6366f1" stroke-width="1.5" />
                     <line x1="50" y1="69" x2="70" y2="69" stroke="#f43f5e" stroke-width="1.5" />
@@ -51,11 +51,11 @@
             </div>
         </div>
 
-        <!-- Список участников -->
+        
         <div v-if="props.command.members && props.command.members.length" class="team-roster-sub">
             <span class="roster-meta-label">Команда:</span>
             <div class="roster-chips-container">
-                <!-- Светло-серые бейджи участников -->
+                
                 <div
                     v-for="memberName in props.command.members"
                     :key="memberName"
@@ -68,7 +68,7 @@
         </div>
     </div>
 
-    <!-- контейнер -->
+    
     <div class="statuses" :style="{ '--statuses-min-width': minScrollWidth }">
         <div class="statuses-scrollbar" ref="topScrollRef" @scroll="syncColumnsScroll">
             <div class="statuses-scrollbar-content"></div>
@@ -236,7 +236,7 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
         gap: 16px;
     }
 
-    /* Для текста и котика */
+    
     .team-header-grid {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -248,10 +248,10 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
     .team-text-details {
         display: flex;
         flex-direction: column;
-        width: 80%; /* Текст распределяется свободно по всей длине панели */
+        width: 80%; 
     }
 
-    /* Название команды */
+    
     .team-display-name-middle {
         font-size: 24px;
         font-weight: 800;
@@ -262,9 +262,9 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
         -webkit-text-fill-color: transparent;
     }
 
-    /* фон описания */
+    
     .team-display-desc-middle-balanced {
-        font-size: 14px; /* Возвращен исходный размер текста */
+        font-size: 14px; 
         color: #334155;
         margin: 0;
         line-height: 1.6;
@@ -275,7 +275,7 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
         border-left: 4px solid #6366f1;
     }
 
-    /* тюнинг котика */
+    
     .cat-container {
     display: flex;
     align-items: center;
@@ -297,7 +297,7 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
         50% { opacity: 1; }
     }
 
-    /* Список участников */
+    
     .team-roster-sub {
         border-top: 1px solid #cbd5e1;
         padding-top: 14px;
@@ -321,7 +321,7 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
         gap: 8px;
     }
 
-    /* бейджи участников */
+    
     .member-chip-pill-middle-light {
         display: inline-flex;
         align-items: center;
@@ -350,7 +350,7 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
         display: inline-block;
     }
 
-    /* Стили доски */
+    
     .statuses { grid-column: 1 / -1; width: 100%; max-width: 100%; min-width: 0; display: grid; gap: 8px; }
     .statuses-scrollbar { width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; }
     .statuses-scrollbar-content { width: max(100%, var(--statuses-min-width)); height: 1px; }

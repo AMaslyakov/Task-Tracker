@@ -1,7 +1,7 @@
 <template>
   <main class="page-shell">
     <section class="workspace">
-      <!-- Шапка приложения с выбором команды и профилем -->
+      
       <AppHeader
         :commands="commands"
         :selected-command-id="selectedCommandId"
@@ -16,10 +16,7 @@
 
         <template v-else>
         <p v-if="statusUpdateError" class="state-message state-message-error">{{ statusUpdateError }}</p>
-          <!--
-            Блок управления кнопкой. Размещен прямо над доской,
-            выровнен по правому краю без сжатия колонок
-          -->
+          
           <div class="dashboard-action-bar">
             <button
               class="create-task-button-dashboard"
@@ -30,7 +27,7 @@
             </button>
           </div>
 
-          <!-- Канбан-доска занимает всю изначальную ширину родителя -->
+          
           <StatusColumnList
             v-model:tasks="tasks"
             :tasks="filteredTasks"
@@ -43,7 +40,7 @@
       </div>
     </section>
 
-    <!-- Универсальное модальное окно управления задачами -->
+    
     <TaskModal
       v-if="isModalOpen"
       :task="selectedTask"
@@ -316,15 +313,15 @@ function replaceTask(updatedTask) {
   align-items: start;
 }
 
-/* Строка панели действий прижимает кнопку вправо над доской */
+
 .dashboard-action-bar {
-  grid-column: 1 / -1; /* Растягивается на всю сетку */
+  grid-column: 1 / -1; 
   display: flex;
-  justify-content: flex-end; /* Кнопка строго по правую сторону */
-  margin-bottom: 4px; /* Небольшой аккуратный зазор до колонок */
+  justify-content: flex-end; 
+  margin-bottom: 4px; 
 }
 
-/* Стилизация кнопки */
+
 .create-task-button-dashboard {
   min-height: 42px;
   border: none;

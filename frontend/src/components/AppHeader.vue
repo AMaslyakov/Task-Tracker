@@ -1,12 +1,12 @@
 <template>
   <div class="toolbar cyberpunk-graphite">
-    <!-- стиль заголовка -->
+    
     <div class="logo-area-cyber">
       <p class="eyebrow-neon">System v2.6</p>
       <h1 class="main-title-neon">Task Tracker</h1>
     </div>
 
-    <!-- Стиль выбора команды -->
+    
     <label class="command-select">
       <span class="select-label">Команда</span>
       <div class="select-wrapper">
@@ -22,7 +22,7 @@
       </div>
     </label>
 
-    <!-- стиль профиля пользователя -->
+    
     <div class="user auth-profile-block">
       <img class="user-icon" src="../assets/user.png" :alt="currentUserName">
       <div class="user-data">
@@ -67,7 +67,7 @@
 </script>
 
 <style scoped>
-/* Главный контейнер */
+
 .toolbar {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   display: flex;
@@ -82,7 +82,7 @@
   box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.12);
 }
 
-/* Блок заголовка */
+
 .logo-area-cyber {
   display: flex;
   flex-direction: column;
@@ -151,7 +151,7 @@
   box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.3);
 }
 
-/* Блок профиля пользователя */
+
 .user {
   display: flex;
   align-items: center;
@@ -226,7 +226,7 @@
   background-color: #1e293b;
 }
 
-/* Адаптивность */
+
 @media (max-width: 760px) {
   .toolbar {
     display: grid;
