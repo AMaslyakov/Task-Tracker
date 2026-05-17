@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import DashboardPage from '../pages/DashboardPage.vue'
 import LoginPage from '../pages/LoginPage.vue'
 import TaskPage from '../pages/TaskPage.vue'
+import AdminPage from '../pages/AdminPage.vue'
 
 const routes = [
   {
@@ -22,6 +23,11 @@ const routes = [
     path: '/task/:id',
     name: 'task',
     component: TaskPage
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: AdminPage
   }
 ]
 
