@@ -1,7 +1,7 @@
 <template>
     <div v-if="props.command?.name" class="team-info-widget middle-panel parent-fluid-length">
 
-        <!-- Верхняя блок с основной информацией -->
+        <!-- Верхний блок с основной информацией -->
         <div class="team-header-grid">
             <div class="team-text-details">
                 <!-- Название команды -->
