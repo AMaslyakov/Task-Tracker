@@ -1,7 +1,6 @@
 <template>
   <main class="page-admin">
     <div class="admin-nav">
-      <!-- ИСПРАВЛЕНО: Жесткий редирект на доску по клику назад -->
       <button type="button" class="back-btn" @click="forceRedirect">
         ← Вернуться к задачам
       </button>
@@ -59,20 +58,28 @@
             Выбрана команда: <strong>{{ selectedTeam.name }}</strong>
           </div>
 
-          <!-- ИСПРАВЛЕНО: Полностью возвращена исходная верстка добавления участников -->
           <form @submit.prevent="handleAddUserToTeam" class="admin-form add-user-inline">
             <label class="form-field">
-              <span>Добавить сотрудника (имя/логин) *</span>
+              <span>Выбрать сотрудника из базы данных *</span>
               <div class="inline-input-group">
-                <input v-model="newUserLog" type="text" placeholder="Например: ivan_dev" required />
-                <button type="submit" class="action-btn add-btn">Добавить</button>
+                <select v-model="newUserLog" class="admin-select-field" required>
+                  <option :value="''" disabled selected>-- Выберите пользователя --</option>
+                  <option
+                    v-for="user in allSystemUsers"
+                    :key="user"
+                    :value="user"
+                    :disabled="selectedTeam.members?.includes(user)"
+                  >
+                    👤 {{ user }} {{ selectedTeam.members?.includes(user) ? '(Уже в команде)' : '' }}
+                  </option>
+                </select>
+                <button type="submit" class="action-btn add-btn" :disabled="!newUserLog">Добавить</button>
               </div>
             </label>
           </form>
 
           <div class="current-members-list">
             <h3 class="inner-title">Состав команды:</h3>
-            <!-- ИСПРАВЛЕНО: Полностью возвращен исходный массив строк участников -->
             <div v-if="selectedTeam.members && selectedTeam.members.length" class="members-chips-grid">
               <div v-for="member in selectedTeam.members" :key="member" class="admin-member-pill">
                 <span class="member-pill-name">{{ member }}</span>
@@ -94,11 +101,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { fetchTeams } from '../api/tasks'
+import { fetchTeams, fetchAllUsers } from '../api/tasks'
 
 const teams = ref([])
 const selectedTeam = ref(null)
 const newUserLog = ref('')
+const allSystemUsers = ref([])
 
 const newTeam = ref({
   name: '',
@@ -116,32 +124,22 @@ async function loadAdminData() {
       selectedTeam.value = teams.value[0]
     }
   } catch (error) {
-    console.warn('Используем тестовые команды:', error)
-    teams.value = [
-      {
-        id: 2,
-        name: "Frontend UI",
-        description: "Разработка клиентского интерфейса на Vue.js",
-        config_dashboard: { statuses: ["TODO", "IN PROGRESS", "REVIEW", "DONE"] },
-        members: ["elena_qa", "alex_pm", "olga_vue"]
-      },
-      {
-        id: 3,
-        name: "Backend Node.js",
-        description: "Разработка серверной логики и API",
-        config_dashboard: { statuses: ["TODO", "IN PROGRESS", "DONE"] },
-        members: ["dmitry_dev", "anna_db"]
-      }
-    ]
-    selectedTeam.value = teams.value[0]
+    console.error('Ошибка загрузки команд с бэкенда:', error)
+  }
+
+  try {
+    const usersResponse = await fetchAllUsers()
+    allSystemUsers.value = usersResponse.map(u => u.user_name).filter(Boolean)
+  } catch (e) {
+    console.error('Ошибка загрузки списка юзеров из таблицы user:', e)
   }
 }
 
 function selectTeam(team) {
   selectedTeam.value = team
+  newUserLog.value = ''
 }
 
-// ИСПРАВЛЕНО: Жесткий редирект через локацию браузера при создании команды
 async function handleCreateTeam() {
   if (!newTeam.value.name.trim()) return
 
@@ -173,28 +171,25 @@ async function handleCreateTeam() {
   } finally {
     newTeam.value.name = ''
     newTeam.value.description = ''
-    // Принудительный редирект на страницу с карточками
     forceRedirect()
   }
 }
 
-// ИСПРАВЛЕНО: Исходное добавление участников в массив строк
 async function handleAddUserToTeam() {
-  if (!newUserLog.value.trim() || !selectedTeam.value) return
+  if (!newUserLog.value || !selectedTeam.value) return
 
   try {
     if (!selectedTeam.value.members) {
       selectedTeam.value.members = []
     }
 
-    selectedTeam.value.members.push(newUserLog.value.trim())
+    selectedTeam.value.members.push(newUserLog.value)
     newUserLog.value = ''
   } catch (error) {
     console.error(error)
   }
 }
 
-// ИСПРАВЛЕНО: Исходное удаление из массива строк
 async function handleRemoveUser(memberName) {
   if (!selectedTeam.value) return
 
@@ -207,13 +202,8 @@ async function handleRemoveUser(memberName) {
   }
 }
 
-// ИСПРАВЛЕНО: Жесткий и надежный редирект, который сработает на любой конфигурации докера
 function forceRedirect() {
   window.location.href = '/tasks'
-}
-
-function goBack() {
-  forceRedirect()
 }
 </script>
 
@@ -296,7 +286,7 @@ function goBack() {
   text-transform: uppercase;
 }
 
-.admin-form input, .admin-form textarea {
+.admin-form input, .admin-form textarea, .admin-select-field {
   font-family: inherit;
   width: 100%;
   border: 1px solid #cbd5e1;
@@ -310,7 +300,17 @@ function goBack() {
   box-sizing: border-box;
 }
 
-.admin-form input:focus, .admin-form textarea:focus {
+.admin-select-field {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://w3.org' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.admin-form input:focus, .admin-form textarea:focus, .admin-select-field:focus {
   border-color: #6366f1;
 }
 
@@ -427,6 +427,11 @@ function goBack() {
   flex-shrink: 0;
 }
 
+.add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .current-members-list {
   margin-top: 20px;
 }
@@ -487,5 +492,7 @@ function goBack() {
 
 @media (max-width: 760px) {
   .admin-grid { grid-template-columns: 1fr; }
+  .inline-input-group { flex-direction: column; }
 }
 </style>
+
