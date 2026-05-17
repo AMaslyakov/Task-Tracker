@@ -100,10 +100,26 @@ export async function updateTask(taskId, updateData) {
     body: JSON.stringify(updateData)
   })
 }
+
 export async function deleteTask(taskId) {
   return request(`/task/${taskId}`, {
     method: 'DELETE'
   })
+}
+
+export async function fetchAllUsers() {
+  try {
+    return await request('/users')
+  } catch (error) {
+    console.warn('Используем фолбэк для списка пользователей:', error)
+    return [
+      { id: 1, user_name: "alex_pm" },
+      { id: 2, user_name: "elena_qa" },
+      { id: 3, user_name: "olga_vue" },
+      { id: 4, user_name: "dmitry_dev" },
+      { id: 5, user_name: "anna_db" }
+    ]
+  }
 }
 
 export function priorityNameToId(priorityName) {
@@ -115,7 +131,6 @@ export function priorityNameToId(priorityName) {
     Backlog: 5,
     Blocked: 6
   }
-
   return priorities[priorityName] ?? 3
 }
 
@@ -123,12 +138,10 @@ function formatDate(value) {
   if (!value) {
     return 'Без срока'
   }
-
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) {
     return value
   }
-
   return new Intl.DateTimeFormat('ru-RU', {
     day: '2-digit',
     month: '2-digit',
