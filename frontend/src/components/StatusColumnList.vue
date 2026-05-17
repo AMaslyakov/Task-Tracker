@@ -80,15 +80,21 @@
                     <div class="status-name"><span>{{ status_name }}</span></div>
 
                     <Sortable
+                        :key="columnRenderKey(status_name)"
                         :list="tasksByStatus[status_name] || []"
                         itemKey="id"
                         tag="div"
                         class="status-column-body"
-                        :options="{ group: 'tasks-kanban', animation: 200, ghostClass: 'ghost-card' }"
-                        @change="(event) => handleTaskMove(event, status_name)"
+                        :options="sortableOptions"
+                        @add="(event) => handleTaskMove(event, status_name)"
                     >
                         <template #item="{ element: task }">
-                            <div class="card" :key="task.id" :class="priorityClass(task.priority)">
+                            <div
+                                class="card"
+                                :key="task.id"
+                                :class="priorityClass(task.priority)"
+                                :data-task-id="task.id"
+                            >
                                 <TaskCard :task="task" />
                             </div>
                         </template>
@@ -106,16 +112,23 @@
 
     const props = defineProps({
         tasks: { type: Array, required: true },
-        command: { type: Object, required: true }
+        command: { type: Object, required: true },
+        isStatusUpdating: { type: Boolean, default: false }
     });
 
-    const emit = defineEmits(['update:tasks', 'task-status-changed']);
+    const emit = defineEmits(['task-status-changed']);
 
     const topScrollRef = ref(null);
     const columnsScrollRef = ref(null);
     const columnMinWidth = 200;
     const columnGap = 10;
     const config = computed(() => props.command.config_dashboard);
+    const sortableOptions = computed(() => ({
+        group: 'tasks-kanban',
+        animation: 200,
+        ghostClass: 'ghost-card',
+        disabled: props.isStatusUpdating
+    }));
 
     const minScrollWidth = computed(() => {
         const statusesCount = config.value?.statuses?.length || 0;
@@ -151,15 +164,23 @@
     });
 
     function handleTaskMove(event, newStatus) {
-        if (event.added) {
-            const movedTask = event.added.element;
-            const updatedTasks = props.tasks.map(task => {
-                if (task.id === movedTask.id) return { ...task, status: newStatus };
-                return task;
-            });
-            emit('update:tasks', updatedTasks);
-            emit('task-status-changed', { taskId: movedTask.id, newStatus });
+        const taskId = event.item?.dataset?.taskId;
+        const movedTask = props.tasks.find(task => String(task.id) === String(taskId));
+
+        if (!movedTask) {
+            return;
         }
+
+        emit('task-status-changed', {
+            taskId: movedTask.id,
+            oldStatus: movedTask.status,
+            newStatus
+        });
+    }
+
+    function columnRenderKey(statusName) {
+        const taskIds = (tasksByStatus.value[statusName] || []).map(task => task.id).join(',');
+        return `${statusName}:${taskIds}`;
     }
 
     function syncColumnsScroll() {
