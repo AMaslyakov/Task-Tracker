@@ -44,111 +44,6 @@ func InsertTask(c *gin.Context) {
 	c.JSON(http.StatusCreated, task)
 }
 
-// UpdateTask godoc
-// @Summary Update task
-// @Tags tasks
-// @Accept json
-// @Produce json
-// @Param id path int true "Task ID"
-// @Param payload body UpdateTaskRequest true "Task update payload"
-// @Success 200 {object} Task
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/task/{id} [patch]
-func UpdateTask(c *gin.Context) {
-	ctx := c.Request.Context()
-
-	taskID, ok := parseTaskID(c)
-	if !ok {
-		return
-	}
-
-	var req UpdateTaskRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid task payload"})
-		return
-	}
-	if err := validateUpdateTaskRequest(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	task, err := DBUpdateTask(ctx, taskID, req)
-	if err != nil {
-		respondTaskDBError(c, err, "failed to update task")
-		return
-	}
-
-	c.JSON(http.StatusOK, task)
-}
-
-// UpdateTaskStatus godoc
-// @Summary Update task status
-// @Description Changes task status, intended for drag-and-drop between dashboard columns.
-// @Tags tasks
-// @Accept json
-// @Produce json
-// @Param id path int true "Task ID"
-// @Param payload body UpdateTaskStatusRequest true "Task status payload"
-// @Success 200 {object} Task
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/task/{id}/status [patch]
-func UpdateTaskStatus(c *gin.Context) {
-	ctx := c.Request.Context()
-
-	taskID, ok := parseTaskID(c)
-	if !ok {
-		return
-	}
-
-	var req UpdateTaskStatusRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid task status payload"})
-		return
-	}
-	req.StatusName = strings.TrimSpace(req.StatusName)
-	if req.StatusName == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "status_name is required"})
-		return
-	}
-
-	task, err := DBUpdateTaskStatus(ctx, taskID, req.StatusName)
-	if err != nil {
-		respondTaskDBError(c, err, "failed to update task status")
-		return
-	}
-
-	c.JSON(http.StatusOK, task)
-}
-
-// DeleteTask godoc
-// @Summary Delete task
-// @Tags tasks
-// @Param id path int true "Task ID"
-// @Success 204
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/task/{id} [delete]
-func DeleteTask(c *gin.Context) {
-	ctx := c.Request.Context()
-
-	taskID, ok := parseTaskID(c)
-	if !ok {
-		return
-	}
-
-	if err := DBDeleteTask(ctx, taskID); err != nil {
-		respondTaskDBError(c, err, "failed to delete task")
-		return
-	}
-
-	c.Status(http.StatusNoContent)
-}
-
 func parseTaskID(c *gin.Context) (int, bool) {
 	taskID, err := strconv.Atoi(c.Param("id"))
 	if err != nil || taskID <= 0 {
@@ -244,4 +139,28 @@ func respondTaskDBError(c *gin.Context, err error, fallbackMessage string) {
 
 	log.Printf("%s: %v", fallbackMessage, err)
 	c.JSON(http.StatusInternalServerError, gin.H{"error": fallbackMessage})
+}
+
+func CreateUser(c *gin.Context) {
+	var req CreateUserRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "неверный формат данных"})
+		return
+	}
+
+	newID, err := DBCreateUser(c.Request.Context(), req)
+	if err != nil {
+		if err.Error() == "user already exists" {
+			c.JSON(http.StatusConflict, gin.H{"error": "пользователь с таким именем или email уже существует"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ошибка сервера"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "user created",
+		"id":      newID,
+	})
 }

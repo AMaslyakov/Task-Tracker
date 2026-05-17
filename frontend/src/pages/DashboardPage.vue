@@ -6,16 +6,16 @@
         :commands="commands"
         :selected-command-id="selectedCommandId"
         :current-user="currentUser"
-        @update:selected-command-id="selectedCommandId = $event"
+        @update:selected-command-id="handleSelectedCommandChange"
         @logout="handleLogout"
       />
 
-      <!-- Исходный неизмененный контейнер сетки дашборда -->
       <div class="content-grid">
         <p v-if="isLoading" class="state-message">Загрузка задач...</p>
         <p v-else-if="errorMessage" class="state-message state-message-error">{{ errorMessage }}</p>
 
         <template v-else>
+        <p v-if="statusUpdateError" class="state-message state-message-error">{{ statusUpdateError }}</p>
           <!--
             Блок управления кнопкой. Размещен прямо над доской,
             выровнен по правому краю без сжатия колонок
@@ -35,8 +35,9 @@
             v-model:tasks="tasks"
             :tasks="filteredTasks"
             :command="selectedCommand"
+            :is-status-updating="isStatusUpdating"
             @edit-task="openEditModal"
-            @task-status-changed="handleStatusDragAndDrop"
+            @task-status-changed="handleTaskStatusChanged"
           />
         </template>
       </div>
@@ -62,7 +63,7 @@ import AppHeader from '../components/AppHeader.vue'
 import StatusColumnList from '../components/StatusColumnList.vue'
 import TaskModal from '../components/TaskModal.vue'
 import { fetchCurrentUser, logout } from '../api/auth'
-import { fetchTasks, fetchTeams, createTask, updateTask, deleteTask, updateTaskStatus } from '../api/tasks'
+import { fetchTasks, fetchTeams, createTask, updateTask, mapTask, deleteTask, updateTaskStatus } from '../api/tasks'
 
 const CURRENT_TEAM_STORAGE_KEY = 'task-tracker-current-team-id'
 const DEFAULT_COMMAND = {
@@ -79,7 +80,9 @@ const tasks = ref([])
 const currentUser = ref(null)
 const selectedCommandId = ref(readSavedCommandId())
 const isLoading = ref(true)
+const isStatusUpdating = ref(false)
 const errorMessage = ref('')
+const statusUpdateError = ref('')
 
 const isModalOpen = ref(false)
 const selectedTask = ref(null)
@@ -96,11 +99,7 @@ const filteredTasks = computed(() => {
   })
 })
 
-watch(selectedCommandId, (commandId) => {
-  if (commandId) {
-    localStorage.setItem(CURRENT_TEAM_STORAGE_KEY, String(commandId))
-  }
-})
+watch(selectedCommandId, saveCommandId)
 
 onMounted(loadDashboard)
 
@@ -199,9 +198,11 @@ async function loadDashboard() {
     const loadedCommands = await fetchTeams()
     commands.value = loadedCommands
 
-    if (!commands.value.some((command) => command.id === selectedCommandId.value)) {
+    if (!commands.value.some((command) => isSameCommandId(command.id, selectedCommandId.value))) {
       selectedCommandId.value = commands.value[0]?.id ?? 0
     }
+
+    saveCommandId(selectedCommandId.value)
 
     tasks.value = await fetchTasks(commands.value)
   } catch (error) {
@@ -227,9 +228,73 @@ async function handleLogout() {
   }
 }
 
+function handleSelectedCommandChange(commandId) {
+  selectedCommandId.value = commandId
+  saveCommandId(commandId)
+  statusUpdateError.value = ''
+}
+
+async function handleTaskStatusChanged({ taskId, oldStatus, newStatus }) {
+  if (isStatusUpdating.value || isSameCommandId(oldStatus, newStatus)) {
+    return
+  }
+
+  isStatusUpdating.value = true
+  statusUpdateError.value = ''
+  setTaskStatus(taskId, newStatus)
+
+  try {
+    const updatedTask = await updateTaskStatus(taskId, newStatus)
+    replaceTask(mapTask(updatedTask, commands.value))
+  } catch (error) {
+    console.error(error)
+    setTaskStatus(taskId, oldStatus)
+    if (error.status === 401) {
+      router.push('/login')
+      return
+    }
+
+    statusUpdateError.value = 'Не удалось сохранить статус задачи'
+  } finally {
+    isStatusUpdating.value = false
+  }
+}
+
 function readSavedCommandId() {
   const savedId = Number(localStorage.getItem(CURRENT_TEAM_STORAGE_KEY))
   return Number.isFinite(savedId) ? savedId : 0
+}
+
+function saveCommandId(commandId) {
+  if (commandId) {
+    localStorage.setItem(CURRENT_TEAM_STORAGE_KEY, String(commandId))
+  } else {
+    localStorage.removeItem(CURRENT_TEAM_STORAGE_KEY)
+  }
+}
+
+function isSameCommandId(leftId, rightId) {
+  return String(leftId) === String(rightId)
+}
+
+function setTaskStatus(taskId, status) {
+  tasks.value = tasks.value.map((task) => {
+    if (task.id === taskId) {
+      return { ...task, status }
+    }
+
+    return task
+  })
+}
+
+function replaceTask(updatedTask) {
+  tasks.value = tasks.value.map((task) => {
+    if (task.id === updatedTask.id) {
+      return updatedTask
+    }
+
+    return task
+  })
 }
 </script>
 
@@ -244,7 +309,6 @@ function readSavedCommandId() {
   margin: 0 auto;
 }
 
-/* ОРИГИНАЛЬНЫЙ ДИЗАЙН: Сетка возвращена в исходное состояние без сжатия */
 .content-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;

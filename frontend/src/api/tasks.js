@@ -2,7 +2,6 @@ const API_BASE = '/api'
 
 const FALLBACK_STATUSES = ['TODO', 'IN PROGRESS', 'REVIEW', 'DONE']
 
-// Ваша оригинальная базовая функция запросов
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
     credentials: 'same-origin',
@@ -10,13 +9,14 @@ async function request(path, options = {}) {
   })
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`)
+    const error = new Error(`API request failed: ${response.status}`)
+    error.status = response.status
+    throw error
   }
 
   return response.json()
 }
 
-// Ваша оригинальная функция получения команд
 export async function fetchTeams() {
   const teams = await request('/teams')
 
@@ -30,34 +30,47 @@ export async function fetchTeams() {
   }))
 }
 
-// Ваша оригинальная функция получения задач
 export async function fetchTasks(teams = []) {
   const tasks = await request('/tasks')
 
-  return tasks.map((task) => {
-    const command = teams.find((team) => team.id === task.team_id)
+  return tasks.map((task) => mapTask(task, teams))
+}
 
-    return {
-      id: task.id,
-      status: task.status_name, // Маппинг статуса из БД
-      title: task.title,
-      description: task.description,
-      priority: task.priority_name, // Маппинг приоритета из БД
-      deadline: formatDate(task.deadline),
-      asigned_to: {
-        name: task.assigned_to || 'Не назначен',
-        email: ''
-      },
-      command: command ?? {
-        id: task.team_id,
-        name: task.team_name,
-        config_dashboard: {
-          statuses: FALLBACK_STATUSES
-        }
-      },
-      tags: []
-    }
+export async function updateTaskStatus(taskId, statusName) {
+  return request(`/task/${taskId}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      status_name: statusName
+    })
   })
+}
+
+export function mapTask(task, teams = []) {
+  const command = teams.find((team) => String(team.id) === String(task.team_id))
+
+  return {
+    id: task.id,
+    status: task.status_name,
+    title: task.title,
+    description: task.description,
+    priority: task.priority_name,
+    deadline: formatDate(task.deadline),
+    asigned_to: {
+      name: task.assigned_to || 'Не назначен',
+      email: ''
+    },
+    command: command ?? {
+      id: task.team_id,
+      name: task.team_name,
+      config_dashboard: {
+        statuses: FALLBACK_STATUSES
+      }
+    },
+    tags: []
+  }
 }
 
 // ДОБАВЛЕНО 1: Функция создания задачи (заглушка, использующая ваш формат)
@@ -106,7 +119,6 @@ export async function updateTask(taskId, updateData) {
     asigned_to: { name: updateData.assigned_to_name || 'Не назначен', email: '' }
   };
 }
-
 // ДОБАВЛЕНО 3: Функция удаления задачи (заглушка)
 export async function deleteTask(taskId) {
   console.log(`API -> Запрос на удаление задачи ${taskId} отправлен`);
@@ -150,4 +162,3 @@ function formatDate(value) {
     minute: '2-digit'
   }).format(date)
 }
-
