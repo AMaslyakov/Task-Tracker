@@ -331,3 +331,7 @@ docker run --rm -v "$PWD/backend/src:/app" -w /app golang:1.25 gofmt -w main.go 
 7. Перевести dashboard на загрузку задач выбранной команды через `GET /api/tasks?team_id=...`.
 8. Добавить миграции PostgreSQL вместо init-only схемы.
 9. Добавить базовые backend/frontend тесты.
+
+## Развернутое приложение
+
+http://80.87.102.162
