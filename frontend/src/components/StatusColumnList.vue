@@ -95,7 +95,12 @@
                                 :class="priorityClass(task.priority)"
                                 :data-task-id="task.id"
                             >
-                                <TaskCard :task="task" @task-click="(clickedTask) => emit('edit-task', clickedTask)" />
+                                <TaskCard
+                                    :task="task"
+                                    @task-click="(clickedTask) => emit('edit-task', clickedTask)"
+                                    @task-edit="(clickedTask) => emit('edit-task', clickedTask)"
+                                    @task-delete="(taskId) => emit('delete-task', taskId)"
+                                />
                             </div>
                         </template>
                     </Sortable>
@@ -116,7 +121,7 @@
         isStatusUpdating: { type: Boolean, default: false }
     });
 
-const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
+const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task', 'delete-task']);
 
 
     const topScrollRef = ref(null);
@@ -219,6 +224,7 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
 <style scoped>
     .team-info-widget.middle-panel {
         font-family: system-ui, -apple-system, sans-serif;
+        grid-column: 1 / -1;
         background-color: #e2e8f0;
         border: 1px solid #cbd5e1;
         border-radius: 12px;
@@ -226,9 +232,10 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
         box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
         margin-bottom: 28px;
 
-        width: 150%;
-        align-self: stretch;
-        flex: 1 1 100%;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        justify-self: stretch;
         box-sizing: border-box;
 
         display: flex;
@@ -248,7 +255,8 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
     .team-text-details {
         display: flex;
         flex-direction: column;
-        width: 80%; 
+        width: 100%;
+        min-width: 0;
     }
 
     
@@ -273,6 +281,7 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
         border-radius: 10px;
         border: 1px solid #e2e8f0;
         border-left: 4px solid #6366f1;
+        overflow-wrap: anywhere;
     }
 
     
@@ -319,6 +328,7 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
+        min-width: 0;
     }
 
     
@@ -369,4 +379,18 @@ const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
     .card.priority-low { border-left: 6px solid #06b6d4; background-color: #f0f9fb; }
     .card.priority-backlog { border-left: 6px solid #6b7280; background-color: #f7f7f8; }
     .card.priority-blocked { border-left: 6px solid #6f42c1; background-color: #f7f2fb; }
+
+    @media (max-width: 760px) {
+        .team-info-widget.middle-panel {
+            padding: 16px;
+        }
+
+        .team-header-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .cat-container {
+            display: none;
+        }
+    }
 </style>

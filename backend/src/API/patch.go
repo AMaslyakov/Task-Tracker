@@ -1,6 +1,9 @@
 package API
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -28,8 +31,8 @@ func UpdateTask(c *gin.Context) {
 		return
 	}
 
-	var req UpdateTaskRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	req, err := parseUpdateTaskRequest(c)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid task payload"})
 		return
 	}
@@ -45,6 +48,33 @@ func UpdateTask(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, task)
+}
+
+func parseUpdateTaskRequest(c *gin.Context) (UpdateTaskRequest, error) {
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		return UpdateTaskRequest{}, err
+	}
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
+
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(body, &fields); err != nil {
+		return UpdateTaskRequest{}, err
+	}
+
+	var req UpdateTaskRequest
+	if err := json.Unmarshal(body, &req); err != nil {
+		return UpdateTaskRequest{}, err
+	}
+
+	if raw, ok := fields["deadline"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		req.ClearDeadline = true
+	}
+	if raw, ok := fields["assigned_to"]; ok && bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		req.ClearAssignedTo = true
+	}
+
+	return req, nil
 }
 
 // UpdateTaskStatus godoc

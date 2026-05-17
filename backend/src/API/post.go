@@ -109,6 +109,9 @@ func validateUpdateTaskRequest(req *UpdateTaskRequest) error {
 	if req.Deadline != nil {
 		hasField = true
 	}
+	if req.ClearDeadline {
+		hasField = true
+	}
 	if req.TeamID != nil {
 		hasField = true
 		if *req.TeamID <= 0 {
@@ -120,6 +123,9 @@ func validateUpdateTaskRequest(req *UpdateTaskRequest) error {
 		if *req.AssignedTo <= 0 {
 			return errors.New("assigned_to must be a positive integer")
 		}
+	}
+	if req.ClearAssignedTo {
+		hasField = true
 	}
 	if !hasField {
 		return errors.New("task update payload must contain at least one field")

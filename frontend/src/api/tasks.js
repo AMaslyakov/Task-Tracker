@@ -14,6 +14,10 @@ async function request(path, options = {}) {
     throw error
   }
 
+  if (response.status === 204) {
+    return null
+  }
+
   return response.json()
 }
 
@@ -22,6 +26,7 @@ export async function fetchTeams() {
 
   return teams.map((team) => ({
     ...team,
+    member_details: Array.isArray(team.member_details) ? team.member_details : [],
     config_dashboard: {
       statuses: Array.isArray(team.config_dashboard) && team.config_dashboard.length > 0
         ? team.config_dashboard
@@ -53,11 +58,14 @@ export function mapTask(task, teams = []) {
 
   return {
     id: task.id,
+    team_id: task.team_id,
     status: task.status_name,
     title: task.title,
     description: task.description,
     priority: task.priority_name,
+    priority_id: priorityNameToId(task.priority_name),
     deadline: formatDate(task.deadline),
+    deadline_raw: task.deadline,
     asigned_to: {
       name: task.assigned_to || 'Не назначен',
       email: ''
@@ -74,41 +82,41 @@ export function mapTask(task, teams = []) {
 }
 
 export async function createTask(taskPayload) {
-  console.log('API -> Запрос на создание задачи отправлен:', taskPayload);
-
-
-  return {
-    id: Math.floor(Math.random() * 10000),
-    title: taskPayload.title,
-    description: taskPayload.description,
-    priority: taskPayload.priority,
-    deadline: formatDate(taskPayload.deadline),
-    status: taskPayload.status,
-    team_id: taskPayload.team_id,
-    command: { id: taskPayload.team_id },
-    asigned_to: { name: taskPayload.assigned_to_name || 'Не назначен', email: '' },
-    tags: []
-  };
+  return request('/task', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(taskPayload)
+  })
 }
 
 export async function updateTask(taskId, updateData) {
-  console.log(`API -> Запрос на обновление задачи ${taskId} отправлен:`, updateData);
-
-
-  return {
-    id: taskId,
-    title: updateData.title,
-    description: updateData.description,
-    priority: updateData.priority,
-    deadline: formatDate(updateData.deadline),
-    asigned_to: { name: updateData.assigned_to_name || 'Не назначен', email: '' }
-  };
+  return request(`/task/${taskId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(updateData)
+  })
 }
 export async function deleteTask(taskId) {
-  console.log(`API -> Запрос на удаление задачи ${taskId} отправлен`);
+  return request(`/task/${taskId}`, {
+    method: 'DELETE'
+  })
+}
 
+export function priorityNameToId(priorityName) {
+  const priorities = {
+    Critical: 1,
+    High: 2,
+    Medium: 3,
+    Low: 4,
+    Backlog: 5,
+    Blocked: 6
+  }
 
-  return { success: true };
+  return priorities[priorityName] ?? 3
 }
 
 function formatDate(value) {
