@@ -2,7 +2,6 @@ package main
 
 import (
 	"backend/API"
-	_ "backend/docs"
 	"backend/events"
 	"context"
 	"log"
@@ -10,8 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // @title Task Tracker API
@@ -85,7 +82,6 @@ func main() {
 	api.GET("/teams", API.GetAllTeams)
 	api.GET("/team/:id", API.GetTeamByID)
 	api.GET("/events", sseHub.SSEHandler)
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	log.Println(" Сервер запущен на :8080")
 	r.Run(":8080")

@@ -40,16 +40,16 @@ broker container
   Сейчас поднят в Docker Compose, но backend-код к нему еще не подключен.
 ```
 
-В production-compose внешний вход в приложение - `http://localhost:8080`, где Nginx раздает frontend и проксирует `/api/` в backend. Backend также проброшен наружу как `http://localhost:8081` для прямой проверки API и Swagger.
+В production-compose внешний вход в приложение - `http://localhost:8080`, где Nginx раздает frontend и проксирует `/api/` в backend. Backend, PostgreSQL и RabbitMQ не публикуют порты наружу и доступны только внутри Docker-сети.
 
 ## 3. Контейнеры и сеть
 
 Система разворачивается через Docker Compose. Имена сервисов и контейнеров фиксированы:
 
 - `frontend` - production-сборка Vue, раздача через Nginx, порт хоста `8080:80`;
-- `backend` - Go/Gin HTTP API, порт внутри сети `8080`, порт хоста `8081:8080`;
-- `postgres` - PostgreSQL, порт `5432:5432`, volume `postgres_data`;
-- `broker` - RabbitMQ management image, порты `5672:5672` и `15672:15672`, volume `broker_data`.
+- `backend` - Go/Gin HTTP API, порт `8080` только внутри Docker-сети;
+- `postgres` - PostgreSQL, порт `5432` только внутри Docker-сети, volume `postgres_data`;
+- `broker` - RabbitMQ management image, порты `5672` и `15672` только внутри Docker-сети, volume `broker_data`.
 
 Внутри Docker-сети сервисы обращаются друг к другу по compose-именам. Для frontend это важно: Nginx проксирует API на `backend:8080`.
 
@@ -118,8 +118,7 @@ Backend расположен в `backend/src` и написан на Go + Gin.
 - `backend/src/API/get.go` - чтение задач и команд;
 - `backend/src/API/post.go` - создание задач и пользователей;
 - `backend/src/API/patch.go` - обновление задач, статуса и пользователей;
-- `backend/src/API/delete.go` - удаление задач и пользователей;
-- `backend/src/docs/` - generated Swagger/OpenAPI docs.
+- `backend/src/API/delete.go` - удаление задач и пользователей.
 
 Backend подключается к PostgreSQL через переменную `DB_DSN`. Подключение создается один раз через `pgxpool.New` и хранится в глобальной переменной `API.Pool`.
 
@@ -139,8 +138,7 @@ Backend подключается к PostgreSQL через переменную `
   - `PATCH /api/task/:id/status`;
   - `DELETE /api/task/:id`;
   - `GET /api/teams`;
-  - `GET /api/team/:id`;
-- `GET /swagger/index.html` - Swagger UI.
+  - `GET /api/team/:id`.
 
 Auth-flow:
 
@@ -317,7 +315,6 @@ docker run --rm -v "$PWD/backend/src:/app" -w /app golang:1.25 gofmt -w main.go 
 - RabbitMQ присутствует инфраструктурно, но не участвует в runtime-потоке.
 - SSE endpoint и frontend realtime отсутствуют.
 - Автотесты для frontend/backend пока не добавлены.
-- Swagger генерируется в Dockerfile через `swag init`, generated docs лежат в репозитории.
 
 ## 11. Что можно доделать, но мы не успели
 
