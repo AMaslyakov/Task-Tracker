@@ -1,22 +1,21 @@
 <template>
-    <!-- Информационный блок о выбранной команде (Растянут и масштабирован) -->
-    <div v-if="props.command?.name" class="team-info-widget middle-panel scaled-panel">
+    <div v-if="props.command?.name" class="team-info-widget middle-panel parent-fluid-length">
 
-        <!-- Верхняя секция с текстом и увеличенным котиком -->
+        <!-- Верхняя блок с основной информацией -->
         <div class="team-header-grid">
             <div class="team-text-details">
-                <!-- Название команды с глубоким и строгим градиентом -->
+                <!-- Название команды -->
                 <h2 class="team-display-name-middle">{{ props.command.name }}</h2>
-                <!-- Сбалансированный мягкий фон описания -->
+                <!-- фон -->
                 <p v-if="props.command.description" class="team-display-desc-middle-balanced">
                     {{ props.command.description }}
                 </p>
             </div>
 
-            <!-- Котик увеличен в 1.3 раза и зафиксирован на правой позиции -->
+            <!-- Котик   -->
             <div class="cat-container">
                 <svg class="coder-cat" viewBox="0 0 120 100" xmlns="http://w3.org">
-                    <!-- Ушки котика -->
+                    <!-- Ушки -->
                     <polygon points="25,40 15,10 40,25" fill="#475569" />
                     <polygon points="28,38 20,18 38,26" fill="#f43f5e" />
                     <polygon points="75,40 85,10 60,25" fill="#475569" />
@@ -26,7 +25,7 @@
                     <!-- Глазки -->
                     <path d="M32,42 Q40,38 42,45" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round" />
                     <path d="M68,42 Q60,38 58,45" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round" />
-                    <!-- Розовый носик и ротик -->
+                    <!-- Нос и рот -->
                     <polygon points="48,48 52,48 50,51" fill="#f43f5e" />
                     <path d="M46,54 Q50,57 54,54" stroke="#0f172a" stroke-width="1.5" fill="none" />
                     <!-- Усики -->
@@ -69,7 +68,7 @@
         </div>
     </div>
 
-    <!-- Исходный неизмененный контейнер доски с колонками -->
+    <!-- контейнер -->
     <div class="statuses" :style="{ '--statuses-min-width': minScrollWidth }">
         <div class="statuses-scrollbar" ref="topScrollRef" @scroll="syncColumnsScroll">
             <div class="statuses-scrollbar-content"></div>
@@ -196,75 +195,74 @@
 </script>
 
 <style scoped>
-    /* Средне-серая подложка */
     .team-info-widget.middle-panel {
         font-family: system-ui, -apple-system, sans-serif;
         background-color: #e2e8f0;
         border: 1px solid #cbd5e1;
-        border-radius: 14px;
-        padding: 20px 24px; /* Оставляем оригинальные отступы для совпадения с Toolbar */
+        border-radius: 12px;
+        padding: 16px 24px;
         box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
         margin-bottom: 28px;
-        width: 100%;
-        max-width: 100%;
-        margin-left: 0;
-        margin-right: 0;
+
+        width: 150%;
+        align-self: stretch;
+        flex: 1 1 100%;
         box-sizing: border-box;
+
         display: flex;
         flex-direction: column;
-        gap: 18px; /* Немного увеличен зазор между блоками внутри */
+        gap: 16px;
     }
 
-    /* Сеточная верстка для текста и котика */
+    /* Для текста и котика */
     .team-header-grid {
         display: grid;
         grid-template-columns: 1fr auto;
         align-items: center;
-        gap: 32px; /* Увеличен зазор до котика */
+        gap: 24px;
         width: 100%;
     }
 
     .team-text-details {
         display: flex;
         flex-direction: column;
-        max-width: 85%; /* ИСПРАВЛЕНО: Текстовый блок стал шире и просторнее внутри панели */
+        width: 80%; /* Текст распределяется свободно по всей длине панели */
     }
 
     /* Название команды */
     .team-display-name-middle {
-        font-size: 26px; /* ИСПРАВЛЕНО: Шрифт увеличен пропорционально масштабу */
+        font-size: 24px;
         font-weight: 800;
-        margin: 0 0 6px 0;
+        margin: 0 0 4px 0;
         letter-spacing: -0.02em;
         background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
 
-    /* Сбалансированный мягкий фон описания */
+    /* фон описания */
     .team-display-desc-middle-balanced {
-        font-size: 14.5px; /* ИСПРАВЛЕНО: Текст стал чуть крупнее для удобства чтения */
+        font-size: 14px; /* Возвращен исходный размер текста */
         color: #334155;
         margin: 0;
         line-height: 1.6;
         background-color: #f8fafc;
-        padding: 14px 18px; /* Увеличены внутренние поля плашки описания */
+        padding: 12px 16px;
         border-radius: 10px;
         border: 1px solid #e2e8f0;
         border-left: 4px solid #6366f1;
     }
 
-    /* Контейнер котика */
+    /* тюнинг котика */
     .cat-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-
-    /* ИСПРАВЛЕНО: Размер котика увеличен ровно в 1.3 раза (со 100px до 130px) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 80px;
+}
     .coder-cat {
-        width: 130px;
+        width: 100px;
         height: auto;
     }
 
@@ -301,7 +299,7 @@
         gap: 8px;
     }
 
-    /* Светло-серые бейджи участников */
+    /* бейджи участников */
     .member-chip-pill-middle-light {
         display: inline-flex;
         align-items: center;
@@ -321,7 +319,6 @@
         border-color: #6366f1;
     }
 
-    /* Синий маркер участника */
     .activity-dot-indicator-middle-light {
         width: 6px;
         height: 6px;
