@@ -41,7 +41,8 @@ func main() {
 		exchangeName = "task_events"
 	}
 
-	rmqClient, err := events.NewRabbitMQClient(context.Background(), brokerURL, exchangeName)
+	ctx := context.Background()
+	rmqClient, err := events.NewRabbitMQClient(ctx, brokerURL, exchangeName)
 	if err != nil {
 		log.Fatalf("Failed to init RabbitMQ: %v", err)
 	}
@@ -53,6 +54,15 @@ func main() {
 	sseHub := events.NewSSEHub()
 	go sseHub.Run()
 	log.Println("SSE Hub started")
+	go func() {
+		if err := rmqClient.Consume(ctx, func(event events.Event) error {
+			sseHub.Broadcast(event)
+			return nil
+		}); err != nil {
+			log.Printf("RabbitMQ consumer stopped: %v", err)
+		}
+	}()
+	log.Println("RabbitMQ consumer started")
 
 	r := gin.Default()
 

@@ -272,6 +272,38 @@ Payload:
 - `404` - задача не найдена.
 - `500` - ошибка удаления задачи из PostgreSQL.
 
+## Events
+
+### `GET /api/events`
+
+Открывает SSE-поток realtime-событий.
+
+Требуется cookie `session_id`. Frontend подключается через `EventSource('/api/events')`; браузер отправляет cookie автоматически для same-origin запроса.
+
+Backend отправляет именованные SSE-события:
+
+- `task.created`;
+- `task.updated`;
+- `task.status_changed`;
+- `task.deleted`.
+
+Формат `data`:
+
+```json
+{
+  "event_type": "task.status_changed",
+  "payload": {
+    "task_id": 1,
+    "team_id": 1,
+    "new_status": "DONE"
+  }
+}
+```
+
+Ошибки:
+
+- `401` - пользователь не авторизован.
+
 ## Teams
 
 ### `GET /api/teams`
