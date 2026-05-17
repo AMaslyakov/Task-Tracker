@@ -87,11 +87,11 @@
                         :options="{ group: 'tasks-kanban', animation: 200, ghostClass: 'ghost-card' }"
                         @change="(event) => handleTaskMove(event, status_name)"
                     >
-                        <template #item="{ element: task }">
-                            <div class="card" :key="task.id" :class="priorityClass(task.priority)">
-                                <TaskCard :task="task" />
-                            </div>
-                        </template>
+                    <template #item="{ element: task }">
+                        <div class="card" :key="task.id" :class="priorityClass(task.priority)">
+                            <TaskCard :task="task" @task-click="(clickedTask) => emit('edit-task', clickedTask)" />
+                        </div>
+                    </template>
                     </Sortable>
                 </div>
             </div>
@@ -109,7 +109,8 @@
         command: { type: Object, required: true }
     });
 
-    const emit = defineEmits(['update:tasks', 'task-status-changed']);
+const emit = defineEmits(['update:tasks', 'task-status-changed', 'edit-task']);
+
 
     const topScrollRef = ref(null);
     const columnsScrollRef = ref(null);
@@ -259,7 +260,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-right: 80px;
+    margin-right: 10px;
 }
     .coder-cat {
         width: 100px;

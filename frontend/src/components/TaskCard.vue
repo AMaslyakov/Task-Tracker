@@ -1,7 +1,7 @@
 <!-- ID, название, описание, статус, приоритет, теги, дата создания, дедлайн -->
 
 <template>
-  <article class="task-card">
+  <article class="task-card" @click="emit('task-click', props.task)">
     <div class="task-header">
       <p class="task-status">{{ task.status }}</p>
       <p class="task-id">id: {{ task.id }}</p>
@@ -46,7 +46,7 @@ defineProps({
   }
 })
 </script>
-
+const emit = defineEmits(['task-click'])
 <style scoped>
 .task-card {
   display: grid;
