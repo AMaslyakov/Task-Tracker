@@ -63,12 +63,46 @@
         return `${statusesCount * columnMinWidth + gapsWidth}px`;
     });
 
-    // Статичное кэширование задач по статусам через computed, чтобы Sortable не терял элементы
+    // Функция вычисления веса на основе данных вашей таблицы SQL priorities
+    function getTaskWeight(task) {
+        // Получаем значение приоритета (это может быть id, текстовое имя или объект)
+        const pValue = task.priority_id || task.priority;
+        if (pValue == null) return 999; // Если приоритет не указан, отправляем вниз
+
+        const pStr = String(pValue).trim().toLowerCase();
+
+        // Карта весов строго по вашей SQL-таблице (id и названия)
+        const WEIGHT_MAP = {
+            // По ID
+            '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6,
+            // По именам (priority_name)
+            'critical': 1, 'high': 2, 'medium': 3, 'low': 4, 'backlog': 5, 'blocked': 6,
+            // По ключевым словам (keywords)
+            'crit': 1, 'urgent': 1,
+            'important': 2, 'major': 2,
+            'normal': 3, 'standard': 3,
+            'minor': 4, 'trivial': 4,
+            'later': 5, 'someday': 5, 'plan': 5,
+            'block': 6
+        };
+
+        return WEIGHT_MAP[pStr] !== undefined ? WEIGHT_MAP[pStr] : 999;
+    }
+
+    // Группировка задач по текстовым статусам с автоматической сортировкой по важности (weight)
     const tasksByStatus = computed(() => {
         const map = {};
         if (config.value?.statuses) {
             config.value.statuses.forEach(status => {
-                map[status] = props.tasks.filter(task => task.status === status);
+                // Фильтруем исходные задачи по названию колонки
+                const filtered = props.tasks.filter(task => {
+                    // Поддержка фильтрации как по имени (task.status), так и по объекту (task.status.name)
+                    const currentStatus = typeof task.status === 'object' ? task.status?.name : task.status;
+                    return String(currentStatus).trim().toLowerCase() === String(status).trim().toLowerCase();
+                });
+
+                // Сортируем: карточки с меньшим weight (Critical = 1) поднимутся наверх (a - b)
+                map[status] = filtered.sort((a, b) => getTaskWeight(a) - getTaskWeight(b));
             });
         }
         return map;
@@ -185,7 +219,6 @@
         background-color: #fff;
     }
 
-    /* Контейнер колонки, куда можно бросать карточки */
     .status-column-body {
         min-height: 500px;
         height: 100%;
@@ -211,14 +244,12 @@
         cursor: grabbing;
     }
 
-    /* Силуэт карточки в момент перетаскивания */
     .ghost-card {
         opacity: 0.4;
         background-color: #e2e8f0 !important;
         border: 2px dashed #cbd5e1 !important;
     }
 
-    /* Стили раскрашивания левых границ карточек и их подложек */
     .card.priority-critical { border-left: 6px solid #b00020; background-color: #fff5f6; }
     .card.priority-high { border-left: 6px solid #ff6f00; background-color: #fff8f0; }
     .card.priority-medium { border-left: 6px solid #f59e0b; background-color: #fffaf0; }
