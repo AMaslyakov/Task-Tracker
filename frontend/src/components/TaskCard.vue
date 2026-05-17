@@ -1,10 +1,40 @@
 <!-- ID, название, описание, статус, приоритет, теги, дата создания, дедлайн -->
 
 <template>
+  <!-- Клик по карточке открывает форму редактирования, как и раньше -->
   <article class="task-card" @click="emit('task-click', props.task)">
+
     <div class="task-header">
-      <p class="task-status">{{ task.status }}</p>
-      <p class="task-id">id: {{ task.id }}</p>
+      <div class="task-meta-line">
+        <div>
+          <p class="task-status">{{ task.status }}</p>
+          <p class="task-id">id: {{ task.id }}</p>
+        </div>
+
+        <!-- ИСПРАВЛЕНО: Кнопка-карандашик с контекстным меню -->
+        <!-- @click.stop запрещает клику проваливаться в саму карточку -->
+        <div class="task-actions-menu" @click.stop>
+          <button
+            type="button"
+            class="pencil-btn"
+            @click="toggleMenu"
+            title="Действия с задачей"
+          >
+            ✏️
+          </button>
+
+          <!-- Всплывающее меню действий -->
+          <div v-if="isMenuOpen" class="actions-dropdown" ref="menuRef">
+            <button type="button" class="dropdown-item" @click="triggerEdit">
+              📝 Редактировать
+            </button>
+            <button type="button" class="dropdown-item delete-item" @click="triggerDelete">
+              🗑️ Удалить задачу
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Заголовок задачи с адаптивным размером -->
       <h3 class="task-title">{{ task.title }}</h3>
     </div>
@@ -17,7 +47,6 @@
       <div class="task-assigned-name">
         Исполнитель: {{ task.assigned_to?.name || task.asigned_to?.name || 'Не назначен' }}
       </div>
-      <!-- Email с автоуменьшением шрифта -->
       <div class="task-assigned-email">
         {{ task.assigned_to?.email || task.asigned_to?.email }}
       </div>
@@ -39,14 +68,66 @@
 </template>
 
 <script setup>
-defineProps({
+import { ref, onMounted, onUnmounted } from 'vue';
+
+const props = defineProps({
   task: {
     type: Object,
     required: true
   }
 })
+
+// ИСПРАВЛЕНО: Добавлены новые типы событий, чтобы другие разработчики могли их легко поймать
+const emit = defineEmits(['task-click', 'task-edit', 'task-delete'])
+
+const isMenuOpen = ref(false)
+const menuRef = ref(null)
+
+// Показать/скрыть меню
+function toggleMenu() {
+  isMenuOpen.value = !isMenuOpen.value
+}
+
+// Передаем команду "Редактировать"
+function triggerEdit() {
+  isMenuOpen.value = false
+  emit('task-click', props.task) // Вызывает открытие стандартной формы заполнения
+}
+
+// Передаем команду "Удалить" родителю с подтверждением
+function triggerDelete() {
+  isMenuOpen.value = false
+  if (confirm('Вы уверены, что хотите безвозвратно удалить эту задачу?')) {
+    // На главной странице сработает функция handleDeleteTask(taskId)
+    // Другие разработчики смогут привязать сюда реальный запрос DELETE
+    const dashboardElement = document.querySelector('.page-shell');
+    if (dashboardElement) {
+      // Имитируем клик по удалению из модалки для моментальной связи с DashboardPage.vue
+      emit('task-click', props.task);
+      setTimeout(() => {
+        const modalDeleteBtn = document.querySelector('.delete-btn');
+        if (modalDeleteBtn) modalDeleteBtn.click();
+      }, 50);
+    }
+  }
+}
+
+// Закрытие выпадающего меню при клике в любое другое место экрана
+function handleClickOutside(event) {
+  if (menuRef.value && !menuRef.value.contains(event.target)) {
+    isMenuOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
-const emit = defineEmits(['task-click'])
+
 <style scoped>
 .task-card {
   display: grid;
@@ -59,6 +140,8 @@ const emit = defineEmits(['task-click'])
   box-sizing: border-box;
   overflow: hidden;
   container-type: inline-size;
+  position: relative; /* Важно для позиционирования меню */
+  cursor: pointer;
 }
 
 .task-card + .task-card {
@@ -69,14 +152,87 @@ const emit = defineEmits(['task-click'])
   width: 100%;
 }
 
+/* Флекс-линия для ID и кнопки-карандашика */
+.task-meta-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+/* ИСПРАВЛЕНО: Контейнер для выпадающего меню действий */
+.task-actions-menu {
+  position: relative;
+  display: inline-block;
+}
+
+/* Маленькая стильная кнопка-карандаш */
+.pencil-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  opacity: 0.6;
+}
+
+.pencil-btn:hover {
+  background-color: #f1f5f9;
+  opacity: 1;
+}
+
+/* Всплывающее контекстное меню */
+.actions-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  min-width: 160px;
+  padding: 4px 0;
+  margin-top: 4px;
+}
+
+/* Пункты меню действий */
+.dropdown-item {
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  padding: 8px 12px;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.dropdown-item:hover {
+  background-color: #f1f5f9;
+}
+
+/* Красный пункт удаления */
+.dropdown-item.delete-item {
+  color: #f43f5e;
+  border-top: 1px solid #f1f5f9;
+}
+
+.dropdown-item.delete-item:hover {
+  background-color: #fff1f2;
+}
+
 .task-title {
   margin: 6px 0 0 0;
   font-weight: 700;
   color: #1e293b;
   width: 100%;
-
   font-size: clamp(13px, 10cqw, 18px);
-
   white-space: normal;
   word-break: break-word;
 }
@@ -120,9 +276,7 @@ const emit = defineEmits(['task-click'])
 .task-assigned-email {
   color: #64748b;
   width: 100%;
-
   font-size: clamp(10px, 7.5cqw, 12px);
-
   word-break: break-all;
 }
 
@@ -154,11 +308,10 @@ const emit = defineEmits(['task-click'])
   padding: 4px 8px;
   background-color: #4f46e5;
   border-radius: 6px;
-
   white-space: nowrap;
-  max-width: 100%;        /* Не дает вылезти за границы карточки */
-  overflow: hidden;       /* Скрывает то, что не влезло */
-  text-overflow: ellipsis; /* Добавляет три точки ... */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   box-sizing: border-box;
 }
 </style>
