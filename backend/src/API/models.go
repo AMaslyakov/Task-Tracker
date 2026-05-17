@@ -62,4 +62,18 @@ type CreateUserRequest struct {
 type UpdateUserRequest struct {
 	Username *string `json:"username"`
 	Email    *string `json:"email"`
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type AuthUser struct {
+	ID       int    `json:"id"`
+	UserName string `json:"user_name"`
+	Email    string `json:"email"`
+	IsAdmin  bool   `json:"is_admin"`
+}
+
+type LoginResponse struct {
+	User AuthUser `json:"user"`
 }

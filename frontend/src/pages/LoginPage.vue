@@ -21,7 +21,9 @@
         />
       </label>
 
-      <button type="submit">Войти</button>
+      <button type="submit" :disabled="isSubmitting">
+        {{ isSubmitting ? 'Входим...' : 'Войти' }}
+      </button>
 
       <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     </form>
@@ -31,13 +33,15 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { login } from '../api/auth'
 
 const router = useRouter()
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
+const isSubmitting = ref(false)
 
-function handleSubmit() {
+async function handleSubmit() {
   errorMessage.value = ''
 
   if (!email.value || !password.value) {
@@ -45,7 +49,20 @@ function handleSubmit() {
     return
   }
 
-  router.push('/tasks')
+  isSubmitting.value = true
+  try {
+    await login(email.value, password.value)
+    router.push('/tasks')
+  } catch (error) {
+    if (error.status === 401) {
+      errorMessage.value = 'Неверный email или пароль'
+      return
+    }
+
+    errorMessage.value = 'Не удалось войти. Проверьте backend и попробуйте еще раз'
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 
@@ -90,6 +107,11 @@ function handleSubmit() {
 .auth-form input:focus {
   border-color: #2563eb;
   outline: 3px solid #dbeafe;
+}
+
+.auth-form button:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .error-message {

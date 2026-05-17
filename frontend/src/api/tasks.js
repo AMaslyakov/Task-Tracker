@@ -3,7 +3,9 @@ const API_BASE = '/api'
 const FALLBACK_STATUSES = ['TODO', 'IN PROGRESS', 'REVIEW', 'DONE']
 
 async function request(path) {
-  const response = await fetch(`${API_BASE}${path}`)
+  const response = await fetch(`${API_BASE}${path}`, {
+    credentials: 'same-origin'
+  })
 
   if (!response.ok) {
     throw new Error(`API request failed: ${response.status}`)

@@ -136,20 +136,22 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
 --привязываем функцию к табице
-CREATE TRIGGER trigger_clean_sessions
+CREATE TRIGGER  IF NOT EXISTS trigger_clean_sessions
 BEFORE INSERT ON sessions
 FOR EACH STATEMENT
 EXECUTE FUNCTION clean_old_sessions_trigger();
+
 -- внешние ключи и частые фильтры
-CREATE INDEX idx_team_members_user ON team_members (user_id);
-CREATE INDEX idx_team_members_team ON team_members (team_id);
+CREATE INDEX  IF NOT EXISTS idx_team_members_user ON team_members (user_id);
+CREATE INDEX  IF NOT EXISTS idx_team_members_team ON team_members (team_id);
 
-CREATE INDEX idx_tasks_team     ON tasks (team_id);
-CREATE INDEX idx_tasks_status   ON tasks (status_id);
-CREATE INDEX idx_tasks_priority ON tasks (priority_id);
-CREATE INDEX idx_tasks_created  ON tasks (created_at);  -- для сортировки "сначала новые"
-CREATE INDEX idx_tasks_assignee ON tasks (assigned_to);
+CREATE INDEX  IF NOT EXISTS idx_tasks_team     ON tasks (team_id);
+CREATE INDEX  IF NOT EXISTS idx_tasks_status   ON tasks (status_id);
+CREATE INDEX  IF NOT EXISTS idx_tasks_priority ON tasks (priority_id);
+CREATE INDEX  IF NOT EXISTS idx_tasks_created  ON tasks (created_at);  -- для сортировки "сначала новые"
+CREATE INDEX  IF NOT EXISTS idx_tasks_assignee ON tasks (assigned_to);
 
-CREATE INDEX idx_users_email    ON users (email);
-CREATE INDEX idx_login_user_id  ON login (user_id);
+CREATE INDEX  IF NOT EXISTS idx_users_email    ON users (email);
+CREATE INDEX  IF NOT EXISTS idx_login_user_id  ON login (user_id);

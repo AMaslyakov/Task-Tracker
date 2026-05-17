@@ -45,6 +45,21 @@ func main() {
 	r.DELETE("/api/users/:id", API.DeleteUser)
 	r.GET("/api/teams", API.GetAllTeams)
 	r.GET("/api/team/:id", API.GetTeamByID)
+	r.POST("/api/login", API.Login)
+	r.GET("/api/me", API.Me)
+	r.POST("/api/logout", API.Logout)
+
+	api := r.Group("/api")
+	api.Use(API.RequireAuth())
+	api.GET("/tasks", API.GetAllTasks)
+	api.GET("/task/:id", API.GetTaskByID)
+	api.POST("/task", API.InsertTask)
+	api.PATCH("/task/:id", API.UpdateTask)
+	api.PATCH("/task/:id/status", API.UpdateTaskStatus)
+	api.DELETE("/task/:id", API.DeleteTask)
+	api.GET("/teams", API.GetAllTeams)
+	api.GET("/team/:id", API.GetTeamByID)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	log.Println(" Сервер запущен на :8080")

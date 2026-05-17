@@ -28,7 +28,7 @@ INSERT INTO login (user_name, email, password_hash, is_admin, user_id)
 SELECT
     u.user_name,
     u.email,
-    '$2a$12$MockHashForTestingPurposesOnlyDocNotUseInProd',
+    '$2a$12$aH67meqOtARuLUoiUHTS4OqkUHJAnNPiNf3Sz8Soh964sKlyzWhpa',
     CASE WHEN u.user_name IN ('MarkZukerberg','Ольга','StivJobs','BillGates','PiterPen','Егор') THEN TRUE ELSE FALSE END,
     u.id
 FROM users u
