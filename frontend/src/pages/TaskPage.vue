@@ -1,4 +1,4 @@
-<!-- ID, название, описание, статус, приоритет, теги, дата создания, дедлайн -->
+
 
 <template>
     <main class="page-task">
@@ -7,5 +7,4 @@
 </template>
 
 <script setup>
-// import { summaryItems, tasks } from '../data/dashboard'
 </script>

@@ -1,7 +1,7 @@
-<!-- ID, название, описание, статус, приоритет, теги, дата создания, дедлайн -->
+
 
 <template>
-  <!-- Клик по карточке открывает форму редактирования, как и раньше -->
+  
   <article class="task-card" @click="emit('task-click', props.task)">
 
     <div class="task-header">
@@ -11,8 +11,8 @@
           <p class="task-id">id: {{ task.id }}</p>
         </div>
 
-        <!-- ИСПРАВЛЕНО: Кнопка-карандашик с контекстным меню -->
-        <!-- @click.stop запрещает клику проваливаться в саму карточку -->
+        
+        
         <div class="task-actions-menu" @click.stop>
           <button
             type="button"
@@ -23,7 +23,7 @@
             ✏️
           </button>
 
-          <!-- Всплывающее меню действий -->
+          
           <div v-if="isMenuOpen" class="actions-dropdown" ref="menuRef">
             <button type="button" class="dropdown-item" @click="triggerEdit">
               📝 Редактировать
@@ -35,14 +35,14 @@
         </div>
       </div>
 
-      <!-- Заголовок задачи с адаптивным размером -->
+      
       <h3 class="task-title">{{ task.title }}</h3>
     </div>
 
-    <!-- Описание задачи -->
+    
     <p class="task-desc">{{ task.description }}</p>
 
-    <!-- Данные исполнителя -->
+    
     <div class="task-assigned">
       <div class="task-assigned-name">
         Исполнитель: {{ task.assigned_to?.name || task.asigned_to?.name || 'Не назначен' }}
@@ -60,7 +60,7 @@
       <span>Выполнить до: {{ task.deadline }}</span>
     </div>
 
-    <!-- Блок тегов -->
+    
     <div v-if="task.tags && task.tags.length" class="task-tags">
         <span v-for="tag in task.tags" :key="tag" class="tag-badge">{{ tag }}</span>
     </div>
@@ -77,32 +77,25 @@ const props = defineProps({
   }
 })
 
-// ИСПРАВЛЕНО: Добавлены новые типы событий, чтобы другие разработчики могли их легко поймать
 const emit = defineEmits(['task-click', 'task-edit', 'task-delete'])
 
 const isMenuOpen = ref(false)
 const menuRef = ref(null)
 
-// Показать/скрыть меню
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
 }
 
-// Передаем команду "Редактировать"
 function triggerEdit() {
   isMenuOpen.value = false
-  emit('task-click', props.task) // Вызывает открытие стандартной формы заполнения
+  emit('task-click', props.task)
 }
 
-// Передаем команду "Удалить" родителю с подтверждением
 function triggerDelete() {
   isMenuOpen.value = false
   if (confirm('Вы уверены, что хотите безвозвратно удалить эту задачу?')) {
-    // На главной странице сработает функция handleDeleteTask(taskId)
-    // Другие разработчики смогут привязать сюда реальный запрос DELETE
     const dashboardElement = document.querySelector('.page-shell');
     if (dashboardElement) {
-      // Имитируем клик по удалению из модалки для моментальной связи с DashboardPage.vue
       emit('task-click', props.task);
       setTimeout(() => {
         const modalDeleteBtn = document.querySelector('.delete-btn');
@@ -112,7 +105,6 @@ function triggerDelete() {
   }
 }
 
-// Закрытие выпадающего меню при клике в любое другое место экрана
 function handleClickOutside(event) {
   if (menuRef.value && !menuRef.value.contains(event.target)) {
     isMenuOpen.value = false
@@ -140,7 +132,7 @@ onUnmounted(() => {
   box-sizing: border-box;
   overflow: hidden;
   container-type: inline-size;
-  position: relative; /* Важно для позиционирования меню */
+  position: relative; 
   cursor: pointer;
 }
 
@@ -152,7 +144,7 @@ onUnmounted(() => {
   width: 100%;
 }
 
-/* Флекс-линия для ID и кнопки-карандашика */
+
 .task-meta-line {
   display: flex;
   justify-content: space-between;
@@ -160,13 +152,13 @@ onUnmounted(() => {
   width: 100%;
 }
 
-/* ИСПРАВЛЕНО: Контейнер для выпадающего меню действий */
+
 .task-actions-menu {
   position: relative;
   display: inline-block;
 }
 
-/* Маленькая стильная кнопка-карандаш */
+
 .pencil-btn {
   background: none;
   border: none;
@@ -183,7 +175,7 @@ onUnmounted(() => {
   opacity: 1;
 }
 
-/* Всплывающее контекстное меню */
+
 .actions-dropdown {
   position: absolute;
   top: 100%;
@@ -198,7 +190,7 @@ onUnmounted(() => {
   margin-top: 4px;
 }
 
-/* Пункты меню действий */
+
 .dropdown-item {
   width: 100%;
   border: none;
@@ -217,7 +209,7 @@ onUnmounted(() => {
   background-color: #f1f5f9;
 }
 
-/* Красный пункт удаления */
+
 .dropdown-item.delete-item {
   color: #f43f5e;
   border-top: 1px solid #f1f5f9;

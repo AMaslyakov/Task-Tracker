@@ -73,25 +73,17 @@ export function mapTask(task, teams = []) {
   }
 }
 
-// ДОБАВЛЕНО 1: Функция создания задачи (заглушка, использующая ваш формат)
 export async function createTask(taskPayload) {
   console.log('API -> Запрос на создание задачи отправлен:', taskPayload);
 
-  // Когда бэкенд-эндпоинт POST /api/tasks будет готов, код заменится на:
-  // return await request('/tasks', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(taskPayload)
-  // });
 
-  // Возвращаем mock-объект, адаптированный под маппинг вашей доски:
   return {
     id: Math.floor(Math.random() * 10000),
     title: taskPayload.title,
     description: taskPayload.description,
     priority: taskPayload.priority,
     deadline: formatDate(taskPayload.deadline),
-    status: taskPayload.status, // 'TODO'
+    status: taskPayload.status,
     team_id: taskPayload.team_id,
     command: { id: taskPayload.team_id },
     asigned_to: { name: taskPayload.assigned_to_name || 'Не назначен', email: '' },
@@ -99,16 +91,9 @@ export async function createTask(taskPayload) {
   };
 }
 
-// ДОБАВЛЕНО 2: Функция обновления задачи (заглушка)
 export async function updateTask(taskId, updateData) {
   console.log(`API -> Запрос на обновление задачи ${taskId} отправлен:`, updateData);
 
-  // Когда эндпоинт PUT /api/tasks/:id будет готов:
-  // return await request(`/tasks/${taskId}`, {
-  //   method: 'PUT',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(updateData)
-  // });
 
   return {
     id: taskId,
@@ -119,31 +104,13 @@ export async function updateTask(taskId, updateData) {
     asigned_to: { name: updateData.assigned_to_name || 'Не назначен', email: '' }
   };
 }
-// ДОБАВЛЕНО 3: Функция удаления задачи (заглушка)
 export async function deleteTask(taskId) {
   console.log(`API -> Запрос на удаление задачи ${taskId} отправлен`);
 
-  // Когда эндпоинт DELETE /api/tasks/:id будет готов:
-  // return await request(`/tasks/${taskId}`, { method: 'DELETE' });
 
   return { success: true };
 }
 
-// ДОБАВЛЕНО 4: Функция обновления статуса при перетаскивании карточек (заглушка)
-export async function updateTaskStatus(taskId, newStatus) {
-  console.log(`API -> Перетаскивание: задача ${taskId} сменила статус на ${newStatus}`);
-
-  // Когда эндпоинт PATCH /api/tasks/:id/status будет готов:
-  // return await request(`/tasks/${taskId}/status`, {
-  //   method: 'PATCH',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ status: newStatus })
-  // });
-
-  return { success: true };
-}
-
-// Ваша оригинальная функция форматирования даты
 function formatDate(value) {
   if (!value) {
     return 'Без срока'

@@ -19,7 +19,6 @@ const routes = [
     component: DashboardPage
   },
   {
-    // Путь будет формироваться по id задачи в
     path: '/task/id', 
     name: 'task',
     component: TaskPage
