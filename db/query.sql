@@ -122,7 +122,25 @@ CREATE TABLE IF NOT EXISTS task_tags (
     tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
     PRIMARY KEY (task_id, tag_id)
 );
+CREATE TABLE IF NOT EXISTS sessions (
+    Sessionid VARCHAR(255) PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
 
+--функци очистки для триггера
+CREATE OR REPLACE FUNCTION clean_old_sessions_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+    DELETE FROM sessions WHERE created_at < NOW() - INTERVAL '30 minutes';
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+--привязываем функцию к табице
+CREATE TRIGGER trigger_clean_sessions
+BEFORE INSERT ON sessions
+FOR EACH STATEMENT
+EXECUTE FUNCTION clean_old_sessions_trigger();
 -- внешние ключи и частые фильтры
 CREATE INDEX idx_team_members_user ON team_members (user_id);
 CREATE INDEX idx_team_members_team ON team_members (team_id);

@@ -6,12 +6,15 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var Pool *pgxpool.Pool
+
+var ErrRelatedEntityNotFound = errors.New("related entity not found")
 
 func DBAllTasks(ctx context.Context) ([]Task, error) {
 	rows, err := Pool.Query(ctx, `
@@ -207,8 +210,200 @@ func DBTeamByID(ctx context.Context, teamID int) (Team, error) {
 	return team, nil
 }
 
-func DBInsertTask(ctx context.Context) error {
+func DBInsertTask(ctx context.Context, req CreateTaskRequest) (Task, error) {
+	var taskID int
+	err := Pool.QueryRow(ctx, `
+        WITH refs AS (
+            SELECT
+                s.id AS status_id,
+                p.id AS priority_id,
+                tm.id AS team_id,
+                creator.id AS created_by,
+                assignee.id AS assigned_to
+            FROM statuses s
+            JOIN priorities p ON p.id = $4
+            JOIN teams tm ON tm.id = $6
+            JOIN users creator ON creator.id = $7
+            LEFT JOIN users assignee ON assignee.id = $8
+            WHERE s.status_name = $3
+              AND ($8::INTEGER IS NULL OR assignee.id IS NOT NULL)
+        )
+        INSERT INTO tasks (
+            title,
+            description,
+            status_id,
+            priority_id,
+            deadline,
+            team_id,
+            created_by,
+            assigned_to
+        )
+        SELECT
+            $1,
+            $2,
+            status_id,
+            priority_id,
+            $5,
+            team_id,
+            created_by,
+            assigned_to
+        FROM refs
+        RETURNING id`,
+		req.Title,
+		req.Description,
+		req.StatusName,
+		req.PriorityID,
+		req.Deadline,
+		req.TeamID,
+		req.CreatedBy,
+		req.AssignedTo,
+	).Scan(&taskID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return Task{}, ErrRelatedEntityNotFound
+		}
+		return Task{}, fmt.Errorf("insert task: %w", err)
+	}
+
+	return DBTaskByID(ctx, taskID)
+}
+
+func DBUpdateTask(ctx context.Context, taskID int, req UpdateTaskRequest) (Task, error) {
+	setParts := []string{}
+	args := []any{}
+	nextArg := 1
+
+	addSet := func(column string, value any) {
+		setParts = append(setParts, fmt.Sprintf("%s = $%d", column, nextArg))
+		args = append(args, value)
+		nextArg++
+	}
+
+	if req.Title != nil {
+		addSet("title", strings.TrimSpace(*req.Title))
+	}
+	if req.Description != nil {
+		addSet("description", *req.Description)
+	}
+	if req.StatusName != nil {
+		statusID, err := DBStatusID(ctx, strings.TrimSpace(*req.StatusName))
+		if err != nil {
+			return Task{}, err
+		}
+		addSet("status_id", statusID)
+	}
+	if req.PriorityID != nil {
+		ok, err := DBIDExists(ctx, "priorities", *req.PriorityID)
+		if err != nil {
+			return Task{}, err
+		}
+		if !ok {
+			return Task{}, ErrRelatedEntityNotFound
+		}
+		addSet("priority_id", *req.PriorityID)
+	}
+	if req.Deadline != nil {
+		addSet("deadline", req.Deadline)
+	}
+	if req.TeamID != nil {
+		ok, err := DBIDExists(ctx, "teams", *req.TeamID)
+		if err != nil {
+			return Task{}, err
+		}
+		if !ok {
+			return Task{}, ErrRelatedEntityNotFound
+		}
+		addSet("team_id", *req.TeamID)
+	}
+	if req.AssignedTo != nil {
+		ok, err := DBIDExists(ctx, "users", *req.AssignedTo)
+		if err != nil {
+			return Task{}, err
+		}
+		if !ok {
+			return Task{}, ErrRelatedEntityNotFound
+		}
+		addSet("assigned_to", *req.AssignedTo)
+	}
+
+	if len(setParts) == 0 {
+		return Task{}, errors.New("empty update")
+	}
+
+	setParts = append(setParts, "updated_at = now()")
+	args = append(args, taskID)
+	query := fmt.Sprintf("UPDATE tasks SET %s WHERE id = $%d", strings.Join(setParts, ", "), nextArg)
+
+	commandTag, err := Pool.Exec(ctx, query, args...)
+	if err != nil {
+		return Task{}, fmt.Errorf("update task: %w", err)
+	}
+	if commandTag.RowsAffected() == 0 {
+		return Task{}, pgx.ErrNoRows
+	}
+
+	return DBTaskByID(ctx, taskID)
+}
+
+func DBUpdateTaskStatus(ctx context.Context, taskID int, statusName string) (Task, error) {
+	statusID, err := DBStatusID(ctx, statusName)
+	if err != nil {
+		return Task{}, err
+	}
+
+	commandTag, err := Pool.Exec(ctx, `
+        UPDATE tasks
+        SET status_id = $1, updated_at = now()
+        WHERE id = $2`, statusID, taskID)
+	if err != nil {
+		return Task{}, fmt.Errorf("update task status: %w", err)
+	}
+	if commandTag.RowsAffected() == 0 {
+		return Task{}, pgx.ErrNoRows
+	}
+
+	return DBTaskByID(ctx, taskID)
+}
+
+func DBDeleteTask(ctx context.Context, taskID int) error {
+	commandTag, err := Pool.Exec(ctx, "DELETE FROM tasks WHERE id = $1", taskID)
+	if err != nil {
+		return fmt.Errorf("delete task: %w", err)
+	}
+	if commandTag.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
 	return nil
+}
+
+func DBStatusID(ctx context.Context, statusName string) (int, error) {
+	var statusID int
+	err := Pool.QueryRow(ctx, "SELECT id FROM statuses WHERE status_name = $1", statusName).Scan(&statusID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, ErrRelatedEntityNotFound
+		}
+		return 0, fmt.Errorf("query status id: %w", err)
+	}
+	return statusID, nil
+}
+
+func DBIDExists(ctx context.Context, tableName string, id int) (bool, error) {
+	allowedTables := map[string]bool{
+		"priorities": true,
+		"teams":      true,
+		"users":      true,
+	}
+	if !allowedTables[tableName] {
+		return false, fmt.Errorf("unsupported lookup table: %s", tableName)
+	}
+
+	var exists bool
+	err := Pool.QueryRow(ctx, fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE id = $1)", tableName), id).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("check %s id exists: %w", tableName, err)
+	}
+	return exists, nil
 }
 
 func CorrectSession(ctx context.Context, SessionId string) (int, bool) {
