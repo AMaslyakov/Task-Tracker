@@ -1,13 +1,12 @@
 <template>
   <div class="toolbar cyberpunk-graphite">
-    <!-- Стилизованный блок заголовка с неоном -->
+    <!--стиль заголовка -->
     <div class="logo-area-cyber">
       <p class="eyebrow-neon">System v2.6</p>
-      <!-- ИСПРАВЛЕНО: Заголовок стал крупнее и выразительнее -->
       <h1 class="main-title-neon">Task Tracker</h1>
     </div>
 
-    <!-- Селектор выбора команды -->
+    <!-- Стиль выбора команды -->
     <label class="command-select">
       <!-- ИСПРАВЛЕНО: Более читаемый, крупный и чистый шрифт -->
       <span class="select-label">Команда</span>
@@ -24,7 +23,7 @@
       </div>
     </label>
 
-    <!-- Профиль пользователя -->
+    <!-- стиль профиля пользователя -->
     <div class="user auth-profile-block">
       <img class="user-icon" src="../assets/user.png" :alt="currentUserName">
       <div class="user-data">
@@ -69,9 +68,8 @@
 </script>
 
 <style scoped>
-/* Главный контейнер тулбара */
+/* Главный контейнер */
 .toolbar {
-  /* Комбинируем: заголовок в стиле Courier, а интерфейс — в читаемом без засечек */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   display: flex;
   align-items: center;
@@ -85,7 +83,7 @@
   box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.12);
 }
 
-/* Блок заголовка с неоном */
+/* Блок заголовка */
 .logo-area-cyber {
   display: flex;
   flex-direction: column;
@@ -102,7 +100,6 @@
   margin: 0 0 2px 0;
 }
 
-/* ИСПРАВЛЕНО: Шрифт увеличен до 36px, вес 900 (максимально жирный) */
 .main-title-neon {
   font-family: 'Courier New', monospace;
   font-size: 36px;
@@ -116,7 +113,6 @@
   filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.4));
 }
 
-/* Стилизация выпадающего списка */
 .command-select {
   display: flex;
   flex-direction: column;
@@ -126,7 +122,6 @@
   max-width: 280px;
 }
 
-/* ИСПРАВЛЕНО: Шрифт переключен на более читаемый system-ui */
 .select-label {
   font-family: system-ui, sans-serif;
   font-size: 13px;
@@ -136,7 +131,6 @@
   letter-spacing: 0.06em;
 }
 
-/* ИСПРАВЛЕНО: Чистый шрифт для выпадающего списка вариантов */
 .command-select select {
   font-family: system-ui, sans-serif;
   width: 100%;
@@ -215,6 +209,7 @@
   margin-top: 4px;
 }
 
+
 .logout-button {
   min-height: 36px;
   border: 1px solid #64748b;
@@ -234,6 +229,7 @@
 }
 
 /* Адаптивность */
+
 @media (max-width: 760px) {
   .toolbar {
     display: grid;
