@@ -1,6 +1,7 @@
 package API
 
 import (
+	"backend/events"
 	"net/http"
 	"strconv"
 
@@ -28,6 +29,11 @@ func DeleteTask(c *gin.Context) {
 		respondTaskDBError(c, err, "failed to delete task")
 		return
 	}
+
+	go publishEvent(events.NewEvent(events.EventTaskDeleted, events.TaskPayload{
+		TaskID: taskID,
+		TeamID: 0,
+	}))
 
 	c.Status(http.StatusNoContent)
 }

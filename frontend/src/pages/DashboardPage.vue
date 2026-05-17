@@ -65,13 +65,14 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '../components/AppHeader.vue'
 import StatusColumnList from '../components/StatusColumnList.vue'
 import TaskForm from '../components/TaskForm.vue'
 import { fetchCurrentUser, logout } from '../api/auth'
 import { fetchTasks, fetchTeams, createTask, updateTask, mapTask, deleteTask, updateTaskStatus, priorityNameToId } from '../api/tasks'
+import { subscribeToTaskEvents } from '../api/events'
 
 const CURRENT_TEAM_STORAGE_KEY = 'task-tracker-current-team-id'
 const DEFAULT_COMMAND = {
@@ -91,6 +92,8 @@ const isLoading = ref(true)
 const isStatusUpdating = ref(false)
 const errorMessage = ref('')
 const statusUpdateError = ref('')
+let unsubscribeFromTaskEvents = null
+let refreshRequestId = 0
 
 const isModalOpen = ref(false)
 const selectedTask = ref(null)
@@ -110,6 +113,7 @@ const filteredTasks = computed(() => {
 watch(selectedCommandId, saveCommandId)
 
 onMounted(loadDashboard)
+onBeforeUnmount(disconnectTaskEvents)
 
 function openCreateModal() {
   selectedTask.value = null;
@@ -194,6 +198,7 @@ async function loadDashboard() {
 
     saveCommandId(selectedCommandId.value)
     tasks.value = await fetchTasks(commands.value)
+    connectTaskEvents()
   } catch (error) {
     console.error(error)
     if (error.status === 401) {
@@ -208,11 +213,49 @@ async function loadDashboard() {
 
 async function handleLogout() {
   try {
+    disconnectTaskEvents()
     await logout()
   } catch (error) {
     console.error(error)
   } finally {
     router.push('/login')
+  }
+}
+
+function connectTaskEvents() {
+  disconnectTaskEvents()
+
+  unsubscribeFromTaskEvents = subscribeToTaskEvents(
+    () => {
+      refreshTasksFromServer()
+    },
+    (error) => {
+      console.error('SSE connection error:', error)
+    }
+  )
+}
+
+function disconnectTaskEvents() {
+  if (typeof unsubscribeFromTaskEvents === 'function') {
+    unsubscribeFromTaskEvents()
+    unsubscribeFromTaskEvents = null
+  }
+}
+
+async function refreshTasksFromServer() {
+  const requestId = ++refreshRequestId
+
+  try {
+    const refreshedTasks = await fetchTasks(commands.value)
+    if (requestId === refreshRequestId) {
+      tasks.value = refreshedTasks
+    }
+  } catch (error) {
+    console.error('Не удалось обновить задачи по realtime-событию:', error)
+    if (error.status === 401) {
+      disconnectTaskEvents()
+      router.push('/login')
+    }
   }
 }
 
