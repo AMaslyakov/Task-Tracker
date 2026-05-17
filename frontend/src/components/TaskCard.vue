@@ -33,8 +33,6 @@
 </template>
 
 <script setup>
-import { tasks } from '../data/dashboard';
-
 defineProps({
   task: {
     type: Object,
