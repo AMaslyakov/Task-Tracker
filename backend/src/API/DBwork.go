@@ -123,7 +123,19 @@ func DBAllTeams(ctx context.Context) ([]Team, error) {
             t.created_at::TEXT,
             t.updated_at::TEXT,
             COALESCE((SELECT ARRAY_AGG(title) FROM tasks WHERE team_id = t.id), '{}') AS tasks,
-            COALESCE((SELECT ARRAY_AGG(u.user_name) FROM team_members tm JOIN users u ON u.id = tm.user_id WHERE tm.team_id = t.id AND tm.is_active = TRUE), '{}') AS members
+            COALESCE((SELECT ARRAY_AGG(u.user_name) FROM team_members tm JOIN users u ON u.id = tm.user_id WHERE tm.team_id = t.id AND tm.is_active = TRUE), '{}') AS members,
+            COALESCE((
+                SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
+                    'id', u.id,
+                    'name', u.user_name,
+                    'email', u.email,
+                    'role', COALESCE(tm.role, ''),
+                    'is_admin', tm.is_admin
+                ) ORDER BY u.user_name)
+                FROM team_members tm
+                JOIN users u ON u.id = tm.user_id
+                WHERE tm.team_id = t.id AND tm.is_active = TRUE
+            ), '[]'::JSONB) AS member_details
         FROM teams t
         ORDER BY t.id
     `
@@ -137,6 +149,7 @@ func DBAllTeams(ctx context.Context) ([]Team, error) {
 	for rows.Next() {
 		var team Team
 		var configDashboard []byte
+		var memberDetails []byte
 		err := rows.Scan(
 			&team.ID,
 			&team.Name,
@@ -146,12 +159,16 @@ func DBAllTeams(ctx context.Context) ([]Team, error) {
 			&team.UpdatedAt,
 			&team.Tasks,
 			&team.Members,
+			&memberDetails,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("scan team: %w", err)
 		}
 		if err := json.Unmarshal(configDashboard, &team.ConfigDashboard); err != nil {
 			return nil, fmt.Errorf("parse team config dashboard: %w", err)
+		}
+		if err := json.Unmarshal(memberDetails, &team.MemberDetails); err != nil {
+			return nil, fmt.Errorf("parse team member details: %w", err)
 		}
 		if team.Tasks == nil {
 			team.Tasks = []string{}
@@ -161,6 +178,9 @@ func DBAllTeams(ctx context.Context) ([]Team, error) {
 		}
 		if team.ConfigDashboard == nil {
 			team.ConfigDashboard = []string{}
+		}
+		if team.MemberDetails == nil {
+			team.MemberDetails = []Member{}
 		}
 		teams = append(teams, team)
 	}
@@ -177,12 +197,25 @@ func DBTeamByID(ctx context.Context, teamID int) (Team, error) {
             t.created_at::TEXT,
             t.updated_at::TEXT,
             COALESCE((SELECT ARRAY_AGG(title) FROM tasks WHERE team_id = t.id), '{}') AS tasks,
-            COALESCE((SELECT ARRAY_AGG(u.user_name) FROM team_members tm JOIN users u ON u.id = tm.user_id WHERE tm.team_id = t.id AND tm.is_active = TRUE), '{}') AS members
+            COALESCE((SELECT ARRAY_AGG(u.user_name) FROM team_members tm JOIN users u ON u.id = tm.user_id WHERE tm.team_id = t.id AND tm.is_active = TRUE), '{}') AS members,
+            COALESCE((
+                SELECT JSONB_AGG(JSONB_BUILD_OBJECT(
+                    'id', u.id,
+                    'name', u.user_name,
+                    'email', u.email,
+                    'role', COALESCE(tm.role, ''),
+                    'is_admin', tm.is_admin
+                ) ORDER BY u.user_name)
+                FROM team_members tm
+                JOIN users u ON u.id = tm.user_id
+                WHERE tm.team_id = t.id AND tm.is_active = TRUE
+            ), '[]'::JSONB) AS member_details
         FROM teams t
         WHERE t.id = $1
     `
 	var team Team
 	var configDashboard []byte
+	var memberDetails []byte
 	err := Pool.QueryRow(ctx, query, teamID).Scan(
 		&team.ID,
 		&team.Name,
@@ -192,12 +225,16 @@ func DBTeamByID(ctx context.Context, teamID int) (Team, error) {
 		&team.UpdatedAt,
 		&team.Tasks,
 		&team.Members,
+		&memberDetails,
 	)
 	if err != nil {
 		return Team{}, fmt.Errorf("query team by id: %w", err)
 	}
 	if err := json.Unmarshal(configDashboard, &team.ConfigDashboard); err != nil {
 		return Team{}, fmt.Errorf("parse team config dashboard: %w", err)
+	}
+	if err := json.Unmarshal(memberDetails, &team.MemberDetails); err != nil {
+		return Team{}, fmt.Errorf("parse team member details: %w", err)
 	}
 	if team.Tasks == nil {
 		team.Tasks = []string{}
@@ -207,6 +244,9 @@ func DBTeamByID(ctx context.Context, teamID int) (Team, error) {
 	}
 	if team.ConfigDashboard == nil {
 		team.ConfigDashboard = []string{}
+	}
+	if team.MemberDetails == nil {
+		team.MemberDetails = []Member{}
 	}
 	return team, nil
 }
@@ -305,6 +345,8 @@ func DBUpdateTask(ctx context.Context, taskID int, req UpdateTaskRequest) (Task,
 	}
 	if req.Deadline != nil {
 		addSet("deadline", req.Deadline)
+	} else if req.ClearDeadline {
+		addSet("deadline", nil)
 	}
 	if req.TeamID != nil {
 		ok, err := DBIDExists(ctx, "teams", *req.TeamID)
@@ -325,6 +367,8 @@ func DBUpdateTask(ctx context.Context, taskID int, req UpdateTaskRequest) (Task,
 			return Task{}, ErrRelatedEntityNotFound
 		}
 		addSet("assigned_to", *req.AssignedTo)
+	} else if req.ClearAssignedTo {
+		addSet("assigned_to", nil)
 	}
 
 	if len(setParts) == 0 {

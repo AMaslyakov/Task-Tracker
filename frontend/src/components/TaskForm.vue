@@ -42,14 +42,14 @@
         
         <label class="form-field">
           <span class="field-label">Исполнитель</span>
-          <select v-model="form.assigned_to_name" class="cyber-select">
+          <select v-model="form.assigned_to" class="cyber-select">
             <option :value="null">Не назначен</option>
             <option
-              v-for="memberName in props.command?.members || []"
-              :key="memberName"
-              :value="memberName"
+              v-for="member in memberOptions"
+              :key="member.id ?? member.name"
+              :value="member.id"
             >
-              {{ memberName }}
+              {{ member.name }}
             </option>
           </select>
         </label>
@@ -121,23 +121,33 @@ const props = defineProps({
 const emit = defineEmits(['close', 'create', 'update', 'delete']);
 
 const isEditMode = computed(() => props.task !== null);
+const memberOptions = computed(() => {
+  if (Array.isArray(props.command?.member_details) && props.command.member_details.length > 0) {
+    return props.command.member_details;
+  }
+
+  return (props.command?.members || []).map((name) => ({ id: null, name }));
+});
 
 const form = ref({
   title: '',
   description: '',
-  assigned_to_name: null,
+  assigned_to: null,
   priority: 'Medium',
   deadline: ''
 });
 
 onMounted(() => {
   if (isEditMode.value && props.task) {
+    const assignedName = props.task.assigned_to?.name || props.task.asigned_to?.name || props.task.assigned_to || null;
+    const assignedMember = memberOptions.value.find((member) => member.name === assignedName);
+
     form.value = {
       title: props.task.title || '',
       description: props.task.description || '',
-      assigned_to_name: props.task.assigned_to?.name || props.task.asigned_to?.name || props.task.assigned_to || null,
+      assigned_to: assignedMember?.id ?? null,
       priority: props.task.priority || 'Medium',
-      deadline: props.task.deadline ? props.task.deadline.split('T')[0] : ''
+      deadline: toDateInputValue(props.task.deadline_raw || props.task.deadline)
     };
   }
 });
@@ -148,7 +158,7 @@ function handleSubmit() {
   if (isEditMode.value) {
     emit('update', { id: props.task.id, ...form.value });
   } else {
-    emit('create', { ...form.value, status: 'TODO' });
+    emit('create', { ...form.value, status: props.command?.config_dashboard?.statuses?.[0] || 'TODO' });
   }
 }
 
@@ -156,6 +166,19 @@ function handleDelete() {
   if (confirm('Вы уверены, что хотите безвозвратно удалить эту задачу?')) {
     emit('delete', props.task.id);
   }
+}
+
+function toDateInputValue(value) {
+  if (!value || value === 'Без срока') {
+    return '';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return String(value).split('T')[0];
+  }
+
+  return date.toISOString().split('T')[0];
 }
 </script>
 
@@ -325,7 +348,6 @@ function handleDelete() {
 
 
 .delete-btn {
-  background-color: #mx-auto;
   background-color: #1e293b;
   border: 1px solid #f43f5e;
   color: #f43f5e;

@@ -34,6 +34,7 @@
             :command="selectedCommand"
             :is-status-updating="isStatusUpdating"
             @edit-task="openEditModal"
+            @delete-task="handleDeleteTask"
             @task-status-changed="handleTaskStatusChanged"
           />
         </template>
@@ -41,7 +42,7 @@
     </section>
 
     
-    <TaskModal
+    <TaskForm
       v-if="isModalOpen"
       :task="selectedTask"
       :command="selectedCommand"
@@ -58,9 +59,9 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '../components/AppHeader.vue'
 import StatusColumnList from '../components/StatusColumnList.vue'
-import TaskModal from '../components/TaskModal.vue'
+import TaskForm from '../components/TaskForm.vue'
 import { fetchCurrentUser, logout } from '../api/auth'
-import { fetchTasks, fetchTeams, createTask, updateTask, mapTask, deleteTask, updateTaskStatus } from '../api/tasks'
+import { fetchTasks, fetchTeams, createTask, updateTask, mapTask, deleteTask, updateTaskStatus, priorityNameToId } from '../api/tasks'
 
 const CURRENT_TEAM_STORAGE_KEY = 'task-tracker-current-team-id'
 const DEFAULT_COMMAND = {
@@ -120,16 +121,16 @@ async function handleCreateTask(formData) {
     const taskPayload = {
       title: formData.title,
       description: formData.description,
-      priority: formData.priority,
-      deadline: formData.deadline || null,
-      status: formData.status,
+      priority_id: priorityNameToId(formData.priority),
+      deadline: toApiDeadline(formData.deadline),
+      status_name: formData.status,
       team_id: selectedCommand.value.id,
       created_by: currentUser.value?.id,
-      assigned_to_name: formData.assigned_to_name
+      assigned_to: formData.assigned_to
     };
 
     const createdTask = await createTask(taskPayload);
-    tasks.value.push(createdTask);
+    tasks.value.push(mapTask(createdTask, commands.value));
     closeModal();
   } catch (error) {
     console.error('Ошибка при создании задачи:', error);
@@ -142,20 +143,12 @@ async function handleUpdateTask(formData) {
     const updatedTaskFromServer = await updateTask(formData.id, {
       title: formData.title,
       description: formData.description,
-      priority: formData.priority,
-      deadline: formData.deadline || null,
-      assigned_to_name: formData.assigned_to_name
+      priority_id: priorityNameToId(formData.priority),
+      deadline: toApiDeadline(formData.deadline),
+      assigned_to: formData.assigned_to
     });
 
-    tasks.value = tasks.value.map(task => {
-      if (task.id === formData.id) {
-        return {
-          ...task,
-          ...updatedTaskFromServer
-        };
-      }
-      return task;
-    });
+    replaceTask(mapTask(updatedTaskFromServer, commands.value));
 
     closeModal();
   } catch (error) {
@@ -292,6 +285,14 @@ function replaceTask(updatedTask) {
 
     return task
   })
+}
+
+function toApiDeadline(value) {
+  if (!value) {
+    return null
+  }
+
+  return new Date(`${value}T00:00:00`).toISOString()
 }
 </script>
 

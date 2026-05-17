@@ -18,18 +18,22 @@
             type="button"
             class="pencil-btn"
             @click="toggleMenu"
+            aria-label="Действия с задачей"
             title="Действия с задачей"
           >
-            ✏️
+            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <path d="M13.7 2.6a1.7 1.7 0 0 1 2.4 0l1.3 1.3a1.7 1.7 0 0 1 0 2.4L7.2 16.5 3 17l.5-4.2L13.7 2.6Z" />
+              <path d="m12.5 4 3.5 3.5" />
+            </svg>
           </button>
 
           
           <div v-if="isMenuOpen" class="actions-dropdown" ref="menuRef">
             <button type="button" class="dropdown-item" @click="triggerEdit">
-              📝 Редактировать
+              Редактировать
             </button>
             <button type="button" class="dropdown-item delete-item" @click="triggerDelete">
-              🗑️ Удалить задачу
+              Удалить задачу
             </button>
           </div>
         </div>
@@ -88,20 +92,13 @@ function toggleMenu() {
 
 function triggerEdit() {
   isMenuOpen.value = false
-  emit('task-click', props.task)
+  emit('task-edit', props.task)
 }
 
 function triggerDelete() {
   isMenuOpen.value = false
   if (confirm('Вы уверены, что хотите безвозвратно удалить эту задачу?')) {
-    const dashboardElement = document.querySelector('.page-shell');
-    if (dashboardElement) {
-      emit('task-click', props.task);
-      setTimeout(() => {
-        const modalDeleteBtn = document.querySelector('.delete-btn');
-        if (modalDeleteBtn) modalDeleteBtn.click();
-      }, 50);
-    }
+    emit('task-delete', props.task.id)
   }
 }
 
@@ -160,19 +157,37 @@ onUnmounted(() => {
 
 
 .pencil-btn {
-  background: none;
-  border: none;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #334155;
   cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-  opacity: 0.6;
+  padding: 0;
+  border-radius: 8px;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  flex: 0 0 32px;
 }
 
-.pencil-btn:hover {
-  background-color: #f1f5f9;
-  opacity: 1;
+.pencil-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pencil-btn:hover,
+.pencil-btn:focus-visible {
+  background-color: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
+  outline: none;
 }
 
 

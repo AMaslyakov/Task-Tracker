@@ -207,6 +207,7 @@ Payload:
 ### `PATCH /api/task/:id`
 
 Обновляет поля задачи. Можно передавать любое непустое подмножество полей.
+Чтобы очистить дедлайн или исполнителя, передайте `null` в `deadline` или `assigned_to`.
 
 Требуется cookie `session_id`.
 
@@ -297,7 +298,16 @@ GET /api/teams
     "created_at": "2026-05-17 10:00:00+00",
     "updated_at": "2026-05-17 10:00:00+00",
     "tasks": ["Подготовить dashboard"],
-    "members": ["user1", "user2"]
+    "members": ["user1", "user2"],
+    "member_details": [
+      {
+        "id": 1,
+        "name": "user1",
+        "email": "user1@example.com",
+        "role": "Lead",
+        "is_admin": true
+      }
+    ]
   }
 ]
 ```
@@ -328,7 +338,16 @@ GET /api/team/1
   "created_at": "2026-05-17 10:00:00+00",
   "updated_at": "2026-05-17 10:00:00+00",
   "tasks": ["Подготовить dashboard"],
-  "members": ["user1", "user2"]
+  "members": ["user1", "user2"],
+  "member_details": [
+    {
+      "id": 1,
+      "name": "user1",
+      "email": "user1@example.com",
+      "role": "Lead",
+      "is_admin": true
+    }
+  ]
 }
 ```
 
