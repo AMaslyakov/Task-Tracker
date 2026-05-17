@@ -14,6 +14,10 @@ async function request(path, options = {}) {
     throw error
   }
 
+  if (response.status === 204) {
+    return null
+  }
+
   return response.json()
 }
 
@@ -22,6 +26,7 @@ export async function fetchTeams() {
 
   return teams.map((team) => ({
     ...team,
+    member_details: Array.isArray(team.member_details) ? team.member_details : [],
     config_dashboard: {
       statuses: Array.isArray(team.config_dashboard) && team.config_dashboard.length > 0
         ? team.config_dashboard
@@ -53,11 +58,14 @@ export function mapTask(task, teams = []) {
 
   return {
     id: task.id,
+    team_id: task.team_id,
     status: task.status_name,
     title: task.title,
     description: task.description,
     priority: task.priority_name,
+    priority_id: priorityNameToId(task.priority_name),
     deadline: formatDate(task.deadline),
+    deadline_raw: task.deadline,
     asigned_to: {
       name: task.assigned_to || 'Не назначен',
       email: ''
@@ -71,6 +79,44 @@ export function mapTask(task, teams = []) {
     },
     tags: []
   }
+}
+
+export async function createTask(taskPayload) {
+  return request('/task', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(taskPayload)
+  })
+}
+
+export async function updateTask(taskId, updateData) {
+  return request(`/task/${taskId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(updateData)
+  })
+}
+export async function deleteTask(taskId) {
+  return request(`/task/${taskId}`, {
+    method: 'DELETE'
+  })
+}
+
+export function priorityNameToId(priorityName) {
+  const priorities = {
+    Critical: 1,
+    High: 2,
+    Medium: 3,
+    Low: 4,
+    Backlog: 5,
+    Blocked: 6
+  }
+
+  return priorities[priorityName] ?? 3
 }
 
 function formatDate(value) {

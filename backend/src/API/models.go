@@ -36,6 +36,9 @@ type UpdateTaskRequest struct {
 	Deadline    *time.Time `json:"deadline"`
 	TeamID      *int       `json:"team_id"`
 	AssignedTo  *int       `json:"assigned_to"`
+
+	ClearDeadline   bool `json:"-"`
+	ClearAssignedTo bool `json:"-"`
 }
 
 type UpdateTaskStatusRequest struct {
@@ -51,6 +54,15 @@ type Team struct {
 	UpdatedAt       string   `json:"updated_at"`
 	Tasks           []string `json:"tasks"`
 	Members         []string `json:"members"`
+	MemberDetails   []Member `json:"member_details"`
+}
+
+type Member struct {
+	ID      int    `json:"id"`
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	Role    string `json:"role"`
+	IsAdmin bool   `json:"is_admin"`
 }
 
 type CreateUserRequest struct {

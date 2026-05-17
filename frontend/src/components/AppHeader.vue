@@ -1,14 +1,13 @@
 <template>
   <div class="toolbar cyberpunk-graphite">
-    <!--стиль заголовка -->
+    
     <div class="logo-area-cyber">
       <p class="eyebrow-neon">System v2.6</p>
       <h1 class="main-title-neon">Task Tracker</h1>
     </div>
 
-    <!-- Стиль выбора команды -->
+    
     <label class="command-select">
-      <!-- ИСПРАВЛЕНО: Более читаемый, крупный и чистый шрифт -->
       <span class="select-label">Команда</span>
       <div class="select-wrapper">
         <select :value="selectedCommandId" @change="handleCommandChange">
@@ -23,7 +22,7 @@
       </div>
     </label>
 
-    <!-- стиль профиля пользователя -->
+    
     <div class="user auth-profile-block">
       <img class="user-icon" src="../assets/user.png" :alt="currentUserName">
       <div class="user-data">
@@ -68,12 +67,13 @@
 </script>
 
 <style scoped>
-/* Главный контейнер */
+
 .toolbar {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 32px;
   margin-bottom: 32px;
   background-color: #1e293b;
@@ -83,7 +83,7 @@
   box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.12);
 }
 
-/* Блок заголовка */
+
 .logo-area-cyber {
   display: flex;
   flex-direction: column;
@@ -118,7 +118,7 @@
   flex-direction: column;
   gap: 6px;
   min-width: 200px;
-  flex-grow: 1;
+  flex: 1 1 220px;
   max-width: 280px;
 }
 
@@ -152,22 +152,26 @@
   box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.3);
 }
 
-/* Блок профиля пользователя */
+
 .user {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 14px;
   background-color: #334155;
-  padding: 10px 20px;
+  padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid #475569;
-  min-width: 260px;
-  flex-shrink: 0;
+  width: min(100%, 420px);
+  min-width: 0;
+  flex: 1 1 300px;
+  box-sizing: border-box;
 }
 
 .user-icon {
   width: 46px;
   height: 46px;
+  min-width: 46px;
   object-fit: cover;
   border-radius: 50%;
   border: 2px solid #475569;
@@ -187,6 +191,9 @@
   color: #f8fafc;
   line-height: 1.2;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-email {
@@ -196,7 +203,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 160px;
+  max-width: 100%;
 }
 
 .user-id {
@@ -209,9 +216,9 @@
   margin-top: 4px;
 }
 
-
 .logout-button {
   min-height: 36px;
+  min-width: 68px;
   border: 1px solid #64748b;
   border-radius: 8px;
   padding: 0 12px;
@@ -228,7 +235,6 @@
   background-color: #1e293b;
 }
 
-/* Адаптивность */
 
 @media (max-width: 760px) {
   .toolbar {
@@ -245,7 +251,17 @@
   .user {
     width: 100%;
     min-width: 0;
-    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 420px) {
+  .user {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .logout-button {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }
 </style>
