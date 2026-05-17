@@ -26,20 +26,23 @@
 
     <!-- Профиль пользователя -->
     <div class="user auth-profile-block">
-      <img class="user-icon" src="../assets/user.png" :alt="user2.name">
+      <img class="user-icon" src="../assets/user.png" :alt="currentUserName">
       <div class="user-data">
-          <span class="user-name">{{ user2.name }}</span>
-          <span class="user-email">{{ user2.email }}</span>
-          <span class="user-id">ID: {{ user2.id }}</span>
+          <span class="user-name">{{ currentUserName }}</span>
+          <span class="user-email">{{ currentUserEmail }}</span>
+          <span class="user-id">ID: {{ currentUserId }}</span>
       </div>
+      <button class="logout-button" type="button" @click="emit('logout')">
+        Выйти
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
-  import { user2 } from "../data/dashboard"
+  import { computed } from 'vue'
 
-  defineProps({
+  const props = defineProps({
     commands: {
       type: Array,
       required: true
@@ -47,10 +50,18 @@
     selectedCommandId: {
       type: Number,
       required: true
+    },
+    currentUser: {
+      type: Object,
+      default: null
     }
   })
 
-  const emit = defineEmits(['update:selectedCommandId'])
+  const emit = defineEmits(['update:selectedCommandId', 'logout'])
+
+  const currentUserName = computed(() => props.currentUser?.user_name ?? 'Пользователь')
+  const currentUserEmail = computed(() => props.currentUser?.email ?? '')
+  const currentUserId = computed(() => props.currentUser?.id ?? '-')
 
   function handleCommandChange(event) {
     emit('update:selectedCommandId', Number(event.target.value))
@@ -173,6 +184,7 @@
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
+  min-width: 0;
 }
 
 .user-name {
@@ -188,6 +200,9 @@
   color: #cbd5e1;
   margin-top: 1px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
 }
 
 .user-id {
@@ -198,6 +213,24 @@
   padding: 1px 6px;
   border-radius: 4px;
   margin-top: 4px;
+}
+
+.logout-button {
+  min-height: 36px;
+  border: 1px solid #64748b;
+  border-radius: 8px;
+  padding: 0 12px;
+  background-color: #0f172a;
+  color: #f8fafc;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  border-color: #c084fc;
+  background-color: #1e293b;
 }
 
 /* Адаптивность */

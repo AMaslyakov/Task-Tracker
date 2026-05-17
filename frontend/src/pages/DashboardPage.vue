@@ -4,7 +4,9 @@
       <AppHeader
         :commands="commands"
         :selected-command-id="selectedCommandId"
+        :current-user="currentUser"
         @update:selected-command-id="selectedCommandId = $event"
+        @logout="handleLogout"
       />
 
       <div class="content-grid">
@@ -18,8 +20,10 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import AppHeader from '../components/AppHeader.vue'
 import StatusColumnList from '../components/StatusColumnList.vue';
+import { fetchCurrentUser, logout } from '../api/auth'
 import { fetchTasks, fetchTeams } from '../api/tasks'
 
 const CURRENT_TEAM_STORAGE_KEY = 'task-tracker-current-team-id'
@@ -31,8 +35,10 @@ const DEFAULT_COMMAND = {
   }
 }
 
+const router = useRouter()
 const commands = ref([])
 const tasks = ref([])
+const currentUser = ref(null)
 const selectedCommandId = ref(readSavedCommandId())
 const isLoading = ref(true)
 const errorMessage = ref('')
@@ -58,6 +64,9 @@ async function loadDashboard() {
   errorMessage.value = ''
 
   try {
+    const currentUserResponse = await fetchCurrentUser()
+    currentUser.value = currentUserResponse.user
+
     const loadedCommands = await fetchTeams()
     commands.value = loadedCommands
 
@@ -68,9 +77,24 @@ async function loadDashboard() {
     tasks.value = await fetchTasks(commands.value)
   } catch (error) {
     console.error(error)
+    if (error.status === 401) {
+      router.push('/login')
+      return
+    }
+
     errorMessage.value = 'Не удалось загрузить задачи из backend'
   } finally {
     isLoading.value = false
+  }
+}
+
+async function handleLogout() {
+  try {
+    await logout()
+  } catch (error) {
+    console.error(error)
+  } finally {
+    router.push('/login')
   }
 }
 

@@ -52,3 +52,19 @@ type Team struct {
 	Tasks           []string `json:"tasks"`
 	Members         []string `json:"members"`
 }
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type AuthUser struct {
+	ID       int    `json:"id"`
+	UserName string `json:"user_name"`
+	Email    string `json:"email"`
+	IsAdmin  bool   `json:"is_admin"`
+}
+
+type LoginResponse struct {
+	User AuthUser `json:"user"`
+}
