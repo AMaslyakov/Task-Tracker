@@ -52,3 +52,14 @@ type Team struct {
 	Tasks           []string `json:"tasks"`
 	Members         []string `json:"members"`
 }
+
+type CreateUserRequest struct {
+	Username string `json:"username" binding:"required,min=3,max=50"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
+type UpdateUserRequest struct {
+	Username *string `json:"username"`
+	Email    *string `json:"email"`
+}

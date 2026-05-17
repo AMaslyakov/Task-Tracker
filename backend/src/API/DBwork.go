@@ -10,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var Pool *pgxpool.Pool
@@ -443,4 +444,80 @@ func scanTasks(rows pgx.Rows) ([]Task, error) {
 		tasks = append(tasks, t)
 	}
 	return tasks, rows.Err()
+}
+
+func DBCreateUser(ctx context.Context, req CreateUserRequest) (int, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return 0, err
+	}
+	tx, err := Pool.Begin(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback(ctx)
+
+	var userID int
+	err = tx.QueryRow(ctx,
+		"INSERT INTO users (user_name, email) VALUES ($1, $2) RETURNING id",
+		req.Username, req.Email).Scan(&userID)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key") {
+			return 0, fmt.Errorf("user already exists")
+		}
+		return 0, err
+	}
+
+	_, err = tx.Exec(ctx,
+		"INSERT INTO login (user_name, email, password_hash, user_id) VALUES ($1, $2, $3, $4)",
+		req.Username, req.Email, string(hashedPassword), userID)
+
+	if err != nil {
+		return 0, err
+	}
+
+	err = tx.Commit(ctx)
+	return userID, err
+}
+
+func DBUpdateUser(ctx context.Context, userID int, req UpdateUserRequest) error {
+	// 1. Защита от пустого запроса
+	if req.Username == nil && req.Email == nil {
+		return fmt.Errorf("payload must contain at least one field")
+	}
+
+	// 2. COALESCE оставит старое значение, если пришло NULL
+	cmd, err := Pool.Exec(ctx, `
+		UPDATE users SET
+			user_name = COALESCE($2, user_name),
+			email     = COALESCE($3, email),
+			updated_at = NOW()
+		WHERE id = $1
+	`, userID, req.Username, req.Email)
+
+	if err != nil {
+		return err
+	}
+
+	// 3. Проверка, что пользователь действительно существует
+	if cmd.RowsAffected() == 0 {
+		return fmt.Errorf("user not found")
+	}
+	return nil
+}
+
+func DBDeleteUser(ctx context.Context, userID int) error {
+	cmdTag, err := Pool.Exec(ctx,
+		"DELETE FROM users WHERE id = $1",
+		userID)
+
+	if err != nil {
+		return err
+	}
+	if cmdTag.RowsAffected() == 0 {
+		return fmt.Errorf("user not found")
+	}
+
+	return nil
 }
